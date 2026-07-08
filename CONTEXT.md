@@ -37,7 +37,7 @@ The OpenTherm boiler water setpoint the App commands on the Plant (the boiler's 
 _Avoid_: Room setpoint, climate temperature (those are Zone air targets), mixer setpoint
 
 **Zone Error**:
-Per thermostat: setpoint minus zone sensor temperature. Zone-level error is the maximum across thermostats in that Zone. The Zone with the largest positive Zone Error is the Critical Zone.
+Per thermostat: setpoint minus zone sensor temperature. Zone-level error is the maximum across thermostats in that Zone whose `hvac_action` is `heating`; thermostats with idle, off, cooling, or unavailable action do not contribute. A Zone with no such thermostats has no eligible Zone Error and cannot become the Critical Zone. The Zone with the largest positive Zone Error is the Critical Zone.
 _Avoid_: Demand (use Heating Demand for the boolean need), delta (ambiguous)
 
 **Heating Demand**:

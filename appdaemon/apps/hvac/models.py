@@ -16,6 +16,7 @@ class ZoneConfig:
 class ThermostatReading:
     entity_id: str
     setpoint: float
+    hvac_action: str | None = None
 
 
 @dataclass(frozen=True)
@@ -24,16 +25,23 @@ class ZoneSnapshot:
     zone_temp: float
     thermostats: tuple[ThermostatReading, ...]
 
+    def _eligible_thermostats(self) -> tuple[ThermostatReading, ...]:
+        return tuple(t for t in self.thermostats if t.hvac_action == "heating")
+
     @property
     def zone_error(self) -> float:
-        if not self.thermostats:
+        thermostats = self._eligible_thermostats()
+        if not thermostats:
             return float("-inf")
-        return max(t.setpoint - self.zone_temp for t in self.thermostats)
+        return max(t.setpoint - self.zone_temp for t in thermostats)
 
     def reference_setpoint(self) -> float:
         """Setpoint of the thermostat with the largest error in this zone."""
+        thermostats = self._eligible_thermostats()
+        if not thermostats:
+            raise ValueError("Zone has no eligible heating thermostats")
         best = max(
-            self.thermostats,
+            thermostats,
             key=lambda t: t.setpoint - self.zone_temp,
         )
         return best.setpoint

@@ -99,7 +99,13 @@ class HvacApp(hass.Hass):
                         level="WARNING",
                     )
                     continue
-                thermostats.append(ThermostatReading(entity_id, setpoint))
+                thermostats.append(
+                    ThermostatReading(
+                        entity_id=entity_id,
+                        setpoint=setpoint,
+                        hvac_action=self._read_hvac_action(entity_id),
+                    )
+                )
 
             if not thermostats:
                 continue
@@ -130,6 +136,12 @@ class HvacApp(hass.Hass):
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def _read_hvac_action(self, entity_id: str) -> str | None:
+        value = self.get_state(entity_id, attribute="hvac_action")
+        if value in (None, "unavailable", "unknown"):
+            return None
+        return str(value)
 
     def _write_setpoint(self, value: float) -> bool:
         entity_id = self._config.plant_setpoint
