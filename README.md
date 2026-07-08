@@ -1,5 +1,7 @@
 # ha-smart-hvac
 
+[![CI](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml/badge.svg)](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml)
+
 AppDaemon HVAC Apps for Home Assistant (OpenTherm multi-zone control — Apps come later).
 
 ## Dev Container (milestone: HA connect)
@@ -11,7 +13,7 @@ AppDaemon HVAC Apps for Home Assistant (OpenTherm multi-zone control — Apps co
    ```
 
 2. Open the folder in a Dev Container (**Dev Containers: Reopen in Container**).
-   Python 3.12 and AppDaemon (`requirements.txt`) install via `postCreateCommand`.
+   Python 3.12 and dependencies install via `uv sync --group dev` in `postCreateCommand`.
 
 3. **Exclusive Session:** stop or disable the Production AppDaemon add-on in Home Assistant.
 
@@ -32,3 +34,14 @@ AppDaemon HVAC Apps for Home Assistant (OpenTherm multi-zone control — Apps co
 
 Location fields in `appdaemon/appdaemon.yaml` are placeholders (`UTC` / `0,0`);
 set them before relying on time or sun helpers.
+
+## Quality checks
+
+```bash
+uv sync --group dev        # install runtime + dev deps
+uv run pytest              # run tests
+uv run ruff check appdaemon tests
+uv run ruff format --check appdaemon tests
+pre-commit install         # optional: run hooks on commit
+pre-commit run --all-files # run hooks manually
+```

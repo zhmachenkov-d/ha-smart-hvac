@@ -12,7 +12,7 @@
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
   ],
-  "postCreateCommand": "pip install -r requirements.txt",
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\" && uv sync --group dev && uv run pre-commit install",
   "customizations": {
     "vscode": {
       "extensions": ["ms-python.python", "github.vscode-pull-request-github"]

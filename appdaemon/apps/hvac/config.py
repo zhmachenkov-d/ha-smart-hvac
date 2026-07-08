@@ -37,7 +37,9 @@ def _parse_zone(raw: Any) -> ZoneConfig:
     for entity_id in thermostats:
         if not isinstance(entity_id, str) or not entity_id:
             raise ConfigError(f"Zone {name!r}: invalid thermostat entity id")
-    return ZoneConfig(name=name, temperature=temperature, thermostats=tuple(thermostats))
+    return ZoneConfig(
+        name=name, temperature=temperature, thermostats=tuple(thermostats)
+    )
 
 
 def _parse_weather_feedforward(raw: Any) -> WeatherFeedforwardConfig:

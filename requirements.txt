@@ -1,2 +1,0 @@
-appdaemon==4.5.13
-pytest>=8.0
