@@ -31,15 +31,14 @@ class HvacApp(hass.Hass):
         config = self._config
         outdoor = self._read_float(config.outdoor_temperature)
         if outdoor is None:
-            self.log(
-                f"Outdoor temperature unavailable: {config.outdoor_temperature}",
-                level="WARNING",
+            self._go_idle(
+                f"Outdoor temperature unavailable: {config.outdoor_temperature}"
             )
             return
 
         zones = self._read_zones(config)
         if not zones:
-            self.log("No zones with valid readings this tick", level="WARNING")
+            self._go_idle("No zones with valid readings this tick")
             return
 
         decision = select_critical_zone(zones)
@@ -54,7 +53,7 @@ class HvacApp(hass.Hass):
             return
 
         u_ff = weather_feedforward(outdoor, config.weather_feedforward)
-        u_track = self._ladrc.step(
+        u_track = self._ladrc.compute_tracking(
             measured=decision.measured,
             reference=decision.reference,
             config=config.ladrc,
@@ -67,12 +66,18 @@ class HvacApp(hass.Hass):
         if not self._write_setpoint(command):
             return
 
+        self._ladrc.advance(decision.measured, command, config.ladrc)
         self.log(
             f"Critical zone {decision.critical_zone}: "
             f"error={decision.zone_error:.2f} °C, "
             f"y={decision.measured:.2f} °C, T_r={decision.reference:.2f} °C, "
             f"u_ff={u_ff:.2f}, u_track={u_track:.2f}, command={command:.2f}"
         )
+
+    def _go_idle(self, message: str) -> None:
+        self._ladrc.clear()
+        self._write_setpoint(0.0)
+        self.log(message, level="WARNING")
 
     def _read_zones(self, config: HvacConfig) -> list[ZoneSnapshot]:
         snapshots: list[ZoneSnapshot] = []
