@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Start AppDaemon against the in-repo config (syncs secrets from .env first).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${ROOT}"
+
+cat <<'EOF'
+════════════════════════════════════════════════════════════════════════
+  EXCLUSIVE SESSION REQUIRED
+
+  Stop or disable the Production AppDaemon add-on in Home Assistant
+  before continuing. Two AppDaemons on the same HA instance can fight
+  over climate / OpenTherm entities.
+
+  When you are done: stop this process, then start the add-on again.
+════════════════════════════════════════════════════════════════════════
+EOF
+
+if [[ ! -f .env ]]; then
+  echo "error: .env is missing. Copy .env.example and set HA_URL and HA_TOKEN:" >&2
+  echo "  cp .env.example .env" >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1091
+source .env
+set +a
+
+if [[ -z "${HA_URL:-}" || -z "${HA_TOKEN:-}" ]]; then
+  echo "error: HA_URL and HA_TOKEN must be set in .env" >&2
+  exit 1
+fi
+
+# Regenerate on every start so .env edits apply without a container rebuild.
+umask 077
+cat > appdaemon/secrets.yaml <<EOF
+ha_url: ${HA_URL}
+token: ${HA_TOKEN}
+EOF
+
+echo "Wrote appdaemon/secrets.yaml from .env"
+echo "Starting AppDaemon (config: ${ROOT}/appdaemon)…"
+exec appdaemon -c "${ROOT}/appdaemon"

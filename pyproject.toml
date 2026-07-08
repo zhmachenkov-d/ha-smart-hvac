@@ -1,0 +1,19 @@
+[project]
+name = "ha-smart-hvac"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["appdaemon==4.5.13"]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.9", "pre-commit>=4.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["appdaemon/apps"]
+
+[tool.ruff]
+target-version = "py312"
+src = ["appdaemon", "tests"]
+exclude = [".cursor"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
