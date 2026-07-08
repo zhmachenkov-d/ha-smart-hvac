@@ -27,7 +27,7 @@ u_0 = k_p(T_r - z_1),\quad u = (u_0 - z_2)/b_0
 
 ## Project note
 
-This repo has not decided that the ADRC Controller **is** LADRC (or [MADRC](/concepts/madrc.md)). The paper’s plant (coil water **flow**) differs from OpenTherm [Set Water Temperature](/concepts/set-water-temperature.md). Treat gains and order as literature examples, not copy-paste settings.
+This project’s [ADRC Controller](/concepts/adrc.md) **is** [LADRC](/concepts/ladrc.md) on Critical Zone air temperature, commanding OpenTherm [Set Water Temperature](/concepts/set-water-temperature.md). Huang’s plant (coil water **flow**) and gains are literature starting points — see [ADR 0002](/docs/adr/0002-ladrc-critical-zone-control.md).
 
 ## Related
 

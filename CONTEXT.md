@@ -37,27 +37,35 @@ The OpenTherm boiler water setpoint the App commands on the Plant (the boiler's 
 _Avoid_: Room setpoint, climate temperature (those are Zone air targets), mixer setpoint
 
 **Zone Error**:
-The difference between a Zone's thermostat setpoint and that Zone's current temperature (how far the Zone is from its comfort target).
-_Avoid_: Demand (until defined), delta (ambiguous)
+Per thermostat: setpoint minus zone sensor temperature. Zone-level error is the maximum across thermostats in that Zone. The Zone with the largest positive Zone Error is the Critical Zone.
+_Avoid_: Demand (use Heating Demand for the boolean need), delta (ambiguous)
+
+**Heating Demand**:
+A Zone (or the house) needs heat when its Zone Error is positive — the Zone air is colder than its thermostat setpoint.
+_Avoid_: Call for heat (informal), boiler on (plant state, not zone need)
 
 **Critical Zone**:
-The Zone currently selected as having the largest Zone Error; it drives Plant demand for that control step.
+The Zone currently selected as having the largest Zone Error among Zones with Heating Demand; its air temperature and reference setpoint drive the LADRC loop for that control step.
 _Avoid_: Master zone, primary room
 
 **Outdoor Temperature**:
 The measured outdoor air temperature used when calculating an appropriate Set Water Temperature.
 _Avoid_: Weather, forecast (unless forecast is explicitly in scope)
 
+**Weather Feedforward**:
+An outdoor-temperature baseline added to the LADRC tracking term when computing Set Water Temperature (linear: base plus slope times comfort reference minus outdoor temperature).
+_Avoid_: Weather compensation (related idea, may differ in formula), curve (unless referring to the configured parameters)
+
 **Multi-Zone Coordinator**:
-The part of the HVAC App that picks the Critical Zone from all Zones and turns its need (plus Outdoor Temperature) into a desired Plant water temperature.
+The part of the HVAC App that computes Zone Error per Zone, selects the Critical Zone, and passes its readings and reference setpoint to the ADRC Controller. It does not own the OpenTherm write.
 _Avoid_: Thermostat, scheduler (unless that is all it does)
 
 **ADRC Controller**:
-The part of the HVAC App that uses Active Disturbance Rejection Control in relation to Set Water Temperature (exact role relative to the Multi-Zone Coordinator is still under discussion). Depth: `knowledge/concepts/adrc.md`.
+The part of the HVAC App that runs LADRC on Critical Zone air temperature and commands Set Water Temperature (feedforward plus tracking, clamped or zero when idle).
 _Avoid_: PID (unless explicitly choosing PID instead), weather compensation (related idea, different algorithm)
 
 **LADRC**:
-Linear Active Disturbance Rejection Control — linear ESO plus linear outer loop; a practical form of ADRC (not yet decided as this project's ADRC Controller implementation). Depth: `knowledge/concepts/ladrc.md`.
+Linear Active Disturbance Rejection Control — linear ESO plus linear outer loop; the ADRC Controller implementation in this project. Depth: `knowledge/concepts/ladrc.md`.
 _Avoid_: PID (related baseline, different algorithm), nonlinear ADRC (related parent idea)
 
 **MADRC**:
@@ -77,6 +85,6 @@ _Avoid_: Kalman filter (different observer family unless explicitly choosing it)
 > **Dev:** Can I start AppDaemon in the Dev Container while the Production Add-on is still running?
 > **Expert:** No. That isn't an Exclusive Session — both would drive the same entities. Stop the add-on first, then run locally.
 > **Dev:** Two Zones want heat; which one moves the boiler?
-> **Expert:** The Critical Zone — the one with the largest Zone Error. The Multi-Zone Coordinator uses that Zone (and Outdoor Temperature) when deciding water temperature. The App still owns ADRC as well; how those two parts share the OpenTherm write is a separate decision.
+> **Expert:** The Critical Zone — the one with the largest Zone Error. The Multi-Zone Coordinator picks it and passes its air temperature and setpoint to the ADRC Controller. The ADRC Controller owns the OpenTherm write: feedforward from Outdoor Temperature plus LADRC tracking, or zero when no Zone has Heating Demand.
 > **Dev:** Is Set Water Temperature the same as a Zone thermostat setpoint?
 > **Expert:** No. Zone thermostats set air temperature targets. Set Water Temperature is the OpenTherm boiler water setpoint.

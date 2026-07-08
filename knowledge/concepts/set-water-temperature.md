@@ -12,7 +12,7 @@ timestamp: 2026-07-08T15:34:24Z
 
 Not the same as a Zone thermostat air setpoint or a mixer setpoint.
 
-[ADRC Controller](/concepts/adrc.md) / [Multi-Zone Coordinator](/concepts/multi-zone-coordinator.md) outputs ultimately drive this write; ownership split is undecided.
+The [ADRC Controller](/concepts/adrc.md) owns this write: [Weather Feedforward](/concepts/outdoor-temperature.md) plus LADRC tracking when a Zone has Heating Demand, or **0** when idle. The [Multi-Zone Coordinator](/concepts/multi-zone-coordinator.md) supplies Critical Zone readings only.
 
 # Citations
 

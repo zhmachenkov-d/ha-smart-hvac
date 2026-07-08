@@ -1,0 +1,142 @@
+"""HVAC App — 60 s LADRC control loop."""
+
+from __future__ import annotations
+
+import appdaemon.plugins.hass.hassapi as hass
+
+from hvac.config import ConfigError, parse_config
+from hvac.coordinator import select_critical_zone
+from hvac.feedforward import weather_feedforward
+from hvac.ladrc import LadrcState
+from hvac.models import HvacConfig, ThermostatReading, ZoneSnapshot
+
+
+class HvacApp(hass.Hass):
+    def initialize(self) -> None:
+        try:
+            self._config: HvacConfig = parse_config(self.args)
+        except ConfigError as exc:
+            self.log(f"HVAC config error: {exc}", level="ERROR")
+            return
+
+        self._ladrc = LadrcState()
+        self.run_every(
+            self.control_tick,
+            "now",
+            self._config.control_interval,
+        )
+        self.log("HVAC LADRC app initialized")
+
+    def control_tick(self, kwargs: dict) -> None:
+        config = self._config
+        outdoor = self._read_float(config.outdoor_temperature)
+        if outdoor is None:
+            self.log(
+                f"Outdoor temperature unavailable: {config.outdoor_temperature}",
+                level="WARNING",
+            )
+            return
+
+        zones = self._read_zones(config)
+        if not zones:
+            self.log("No zones with valid readings this tick", level="WARNING")
+            return
+
+        decision = select_critical_zone(zones)
+
+        if not decision.has_demand:
+            self._ladrc.clear()
+            self._write_setpoint(0.0)
+            self.log(
+                f"No heating demand (max zone error {decision.zone_error:.2f} °C); "
+                "setpoint 0"
+            )
+            return
+
+        u_ff = weather_feedforward(outdoor, config.weather_feedforward)
+        u_track = self._ladrc.step(
+            measured=decision.measured,
+            reference=decision.reference,
+            config=config.ladrc,
+            critical_zone=decision.critical_zone,
+        )
+        command = max(
+            config.setpoint_min,
+            min(config.setpoint_max, u_ff + u_track),
+        )
+        if not self._write_setpoint(command):
+            return
+
+        self.log(
+            f"Critical zone {decision.critical_zone}: "
+            f"error={decision.zone_error:.2f} °C, "
+            f"y={decision.measured:.2f} °C, T_r={decision.reference:.2f} °C, "
+            f"u_ff={u_ff:.2f}, u_track={u_track:.2f}, command={command:.2f}"
+        )
+
+    def _read_zones(self, config: HvacConfig) -> list[ZoneSnapshot]:
+        snapshots: list[ZoneSnapshot] = []
+        for zone in config.zones:
+            zone_temp = self._read_float(zone.temperature)
+            if zone_temp is None:
+                self.log(
+                    f"Zone {zone.name}: temperature unavailable ({zone.temperature})",
+                    level="WARNING",
+                )
+                continue
+
+            thermostats: list[ThermostatReading] = []
+            for entity_id in zone.thermostats:
+                setpoint = self._read_setpoint(entity_id)
+                if setpoint is None:
+                    self.log(
+                        f"Zone {zone.name}: thermostat unavailable ({entity_id})",
+                        level="WARNING",
+                    )
+                    continue
+                thermostats.append(ThermostatReading(entity_id, setpoint))
+
+            if not thermostats:
+                continue
+
+            snapshots.append(
+                ZoneSnapshot(
+                    name=zone.name,
+                    zone_temp=zone_temp,
+                    thermostats=tuple(thermostats),
+                )
+            )
+        return snapshots
+
+    def _read_float(self, entity_id: str) -> float | None:
+        state = self.get_state(entity_id)
+        if state in (None, "unavailable", "unknown"):
+            return None
+        try:
+            return float(state)
+        except (TypeError, ValueError):
+            return None
+
+    def _read_setpoint(self, entity_id: str) -> float | None:
+        value = self.get_state(entity_id, attribute="temperature")
+        if value in (None, "unavailable", "unknown"):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    def _write_setpoint(self, value: float) -> bool:
+        entity_id = self._config.plant_setpoint
+        if self.get_state(entity_id) in (None, "unavailable", "unknown"):
+            self.log(
+                f"Plant setpoint unavailable: {entity_id}",
+                level="WARNING",
+            )
+            return False
+        self.call_service(
+            "number/set_value",
+            entity_id=entity_id,
+            value=value,
+        )
+        return True

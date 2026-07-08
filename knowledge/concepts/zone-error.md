@@ -8,11 +8,9 @@ timestamp: 2026-07-08T15:34:24Z
 
 # Zone Error
 
-**Zone Error** is the difference between a [Zone](/concepts/zone.md)’s thermostat setpoint and that Zone’s current temperature (how far the Zone is from its comfort target).
+**Zone Error** is, per thermostat in a [Zone](/concepts/zone.md): setpoint minus zone sensor temperature. Zone-level error is the **maximum** across thermostats in that Zone. The [Critical Zone](/concepts/critical-zone.md) is the Zone with the largest positive Zone Error in a control step.
 
-Avoid “demand” until that term is defined, and “delta” (ambiguous).
-
-The [Critical Zone](/concepts/critical-zone.md) is the Zone with the largest Zone Error in a control step.
+Use **Heating Demand** when a Zone needs heat (zone error > 0). Avoid “delta” (ambiguous).
 
 # Citations
 
