@@ -1,0 +1,22 @@
+hvac:
+  module: hvac
+  class: HvacApp
+  outdoor_temperature: sensor.outdoor_temperature
+  plant_setpoint: number.boiler_water_setpoint
+  setpoint_min: 30
+  setpoint_max: 75
+  control_interval: 60
+  weather_feedforward:
+    base: 25
+    slope: 1.2
+    comfort_ref: 20
+  ladrc:
+    b0: 2.8
+    kp: 0.053
+    beta1: 15
+    beta2: 380
+  zones:
+    - name: living_room
+      temperature: sensor.living_room_temperature
+      thermostats:
+        - climate.living_room
