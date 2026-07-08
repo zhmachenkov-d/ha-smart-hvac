@@ -53,8 +53,20 @@ The part of the HVAC App that picks the Critical Zone from all Zones and turns i
 _Avoid_: Thermostat, scheduler (unless that is all it does)
 
 **ADRC Controller**:
-The part of the HVAC App that uses Active Disturbance Rejection Control in relation to Set Water Temperature (exact role relative to the Multi-Zone Coordinator is still under discussion).
+The part of the HVAC App that uses Active Disturbance Rejection Control in relation to Set Water Temperature (exact role relative to the Multi-Zone Coordinator is still under discussion). Depth: `knowledge/concepts/adrc.md`.
 _Avoid_: PID (unless explicitly choosing PID instead), weather compensation (related idea, different algorithm)
+
+**LADRC**:
+Linear Active Disturbance Rejection Control — linear ESO plus linear outer loop; a practical form of ADRC (not yet decided as this project's ADRC Controller implementation). Depth: `knowledge/concepts/ladrc.md`.
+_Avoid_: PID (related baseline, different algorithm), nonlinear ADRC (related parent idea)
+
+**MADRC**:
+Modified Active Disturbance Rejection Control — ADRC/LADRC with an inertia compensator delaying the ESO’s command input so it stays synchronized with a high-order lag plant (not yet decided for this project). Depth: `knowledge/concepts/madrc.md`.
+_Avoid_: Smith predictor (related delay idea, different structure), plain LADRC (no command-path compensator)
+
+**Extended State Observer**:
+The ADRC/LADRC observer that estimates the measured output and an extra state for total disturbance. Depth: `knowledge/concepts/extended-state-observer.md`.
+_Avoid_: Kalman filter (different observer family unless explicitly choosing it)
 
 ## Example dialogue
 
