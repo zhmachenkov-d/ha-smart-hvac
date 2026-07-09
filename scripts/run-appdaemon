@@ -41,5 +41,12 @@ token: ${HA_TOKEN}
 EOF
 
 echo "Wrote appdaemon/secrets.yaml from .env"
+
+APPDAEMON_BIN="${ROOT}/.venv/bin/appdaemon"
+if [[ ! -x "${APPDAEMON_BIN}" ]]; then
+  echo "error: AppDaemon not installed. Run: uv sync --group dev" >&2
+  exit 1
+fi
+
 echo "Starting AppDaemon (config: ${ROOT}/appdaemon)…"
-exec appdaemon -c "${ROOT}/appdaemon"
+exec "${APPDAEMON_BIN}" -c "${ROOT}/appdaemon"

@@ -6,8 +6,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "containerEnv": {
-    "GH_TOKEN": "${localEnv:GH_TOKEN}"
+  "containerEnv": {    
   },
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
@@ -18,5 +17,10 @@
       "extensions": ["ms-python.python", "github.vscode-pull-request-github"]
     }
   },
+  "runArgs": [
+    "--volume=/etc/timezone:/etc/timezone:ro",
+    "--env-file",
+    "${localWorkspaceFolder}/.env"
+  ], 
   "remoteUser": "vscode"
 }

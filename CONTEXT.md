@@ -36,8 +36,12 @@ _Avoid_: HVAC system (too broad), heater (ambiguous with zone emitters)
 The OpenTherm boiler water setpoint the App commands on the Plant (the boiler's target water temperature via OpenTherm).
 _Avoid_: Room setpoint, climate temperature (those are Zone air targets), mixer setpoint
 
+**Plant Management**:
+When enabled, the App may command Set Water Temperature on the Plant. When disabled, the App does not write the Plant setpoint and clears controller state.
+_Avoid_: CH override (integration-specific), boiler on (plant state)
+
 **Zone Error**:
-Per thermostat: setpoint minus zone sensor temperature. Zone-level error is the maximum across thermostats in that Zone. The Zone with the largest positive Zone Error is the Critical Zone.
+Per thermostat: setpoint minus zone sensor temperature. Zone-level error is the maximum across thermostats in that Zone whose `hvac_action` is `heating`; thermostats with idle, off, cooling, or unavailable action do not contribute. A Zone with no such thermostats has no eligible Zone Error and cannot become the Critical Zone. The Zone with the largest positive Zone Error is the Critical Zone.
 _Avoid_: Demand (use Heating Demand for the boolean need), delta (ambiguous)
 
 **Heating Demand**:
@@ -88,3 +92,5 @@ _Avoid_: Kalman filter (different observer family unless explicitly choosing it)
 > **Expert:** The Critical Zone — the one with the largest Zone Error. The Multi-Zone Coordinator picks it and passes its air temperature and setpoint to the ADRC Controller. The ADRC Controller owns the OpenTherm write: feedforward from Outdoor Temperature plus LADRC tracking, or zero when no Zone has Heating Demand.
 > **Dev:** Is Set Water Temperature the same as a Zone thermostat setpoint?
 > **Expert:** No. Zone thermostats set air temperature targets. Set Water Temperature is the OpenTherm boiler water setpoint.
+> **Dev:** A Zone has Heating Demand but Plant Management is off — does the App still write zero?
+> **Expert:** No. Plant Management off means hands off entirely: no setpoint write, controller state cleared. Heating Demand only matters when Plant Management is on.
