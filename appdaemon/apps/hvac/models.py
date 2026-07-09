@@ -64,12 +64,41 @@ class WeatherFeedforwardConfig:
 
 
 @dataclass(frozen=True)
+class LadrcTuneConfig:
+    ki: float
+    deadband: float
+    min_steady_ticks: int
+    max_rate_fraction: float
+
+
+@dataclass(frozen=True)
 class LadrcConfig:
     b0: float
-    kp: float
-    beta1: float
-    beta2: float
+    omega_o: float
+    omega_c: float
+    omega_c_min: float
+    omega_c_max: float
+    tune: LadrcTuneConfig
     dt: float = 60.0
+
+    @property
+    def kp(self) -> float:
+        return self.omega_c
+
+    @property
+    def beta2(self) -> float:
+        return self.omega_o * self.omega_o
+
+    def with_omega_c(self, omega_c: float) -> LadrcConfig:
+        return LadrcConfig(
+            b0=self.b0,
+            omega_o=self.omega_o,
+            omega_c=omega_c,
+            omega_c_min=self.omega_c_min,
+            omega_c_max=self.omega_c_max,
+            tune=self.tune,
+            dt=self.dt,
+        )
 
 
 def plant_management_enabled(switch_state: str | None) -> bool:
@@ -86,4 +115,5 @@ class HvacConfig:
     control_interval: int
     weather_feedforward: WeatherFeedforwardConfig
     ladrc: LadrcConfig
+    tune_state_path: str
     zones: tuple[ZoneConfig, ...]
