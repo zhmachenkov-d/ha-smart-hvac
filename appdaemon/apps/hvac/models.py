@@ -72,9 +72,14 @@ class LadrcConfig:
     dt: float = 60.0
 
 
+def plant_management_enabled(switch_state: str | None) -> bool:
+    return switch_state == "on"
+
+
 @dataclass(frozen=True)
 class HvacConfig:
     outdoor_temperature: str
+    plant_management: str
     plant_setpoint: str
     setpoint_min: float
     setpoint_max: float

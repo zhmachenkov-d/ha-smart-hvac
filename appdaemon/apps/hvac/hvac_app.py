@@ -8,7 +8,12 @@ from hvac.config import ConfigError, parse_config
 from hvac.coordinator import select_critical_zone
 from hvac.feedforward import weather_feedforward
 from hvac.ladrc import LadrcState
-from hvac.models import HvacConfig, ThermostatReading, ZoneSnapshot
+from hvac.models import (
+    HvacConfig,
+    ThermostatReading,
+    ZoneSnapshot,
+    plant_management_enabled,
+)
 
 
 class HvacApp(hass.Hass):
@@ -29,6 +34,10 @@ class HvacApp(hass.Hass):
 
     def control_tick(self, kwargs: dict) -> None:
         config = self._config
+        if not plant_management_enabled(self.get_state(config.plant_management)):
+            self._hands_off("Plant Management disabled")
+            return
+
         outdoor = self._read_float(config.outdoor_temperature)
         if outdoor is None:
             self._go_idle(
@@ -73,6 +82,10 @@ class HvacApp(hass.Hass):
             f"y={decision.measured:.2f} °C, T_r={decision.reference:.2f} °C, "
             f"u_ff={u_ff:.2f}, u_track={u_track:.2f}, command={command:.2f}"
         )
+
+    def _hands_off(self, message: str) -> None:
+        self._ladrc.clear()
+        self.log(message, level="WARNING")
 
     def _go_idle(self, message: str) -> None:
         self._ladrc.clear()

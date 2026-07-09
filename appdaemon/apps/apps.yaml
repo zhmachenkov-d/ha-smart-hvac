@@ -1,10 +1,11 @@
 hvac:
   module: hvac
   class: HvacApp
-  outdoor_temperature: sensor.outdoor_temperature
-  plant_setpoint: number.boiler_water_setpoint
-  setpoint_min: 30
-  setpoint_max: 75
+  outdoor_temperature: sensor.indoor_outdoor_meter_794a
+  plant_management: switch.opentherm_bridge_ch_enabled
+  plant_setpoint: number.opentherm_bridge_control_setpoint
+  setpoint_min: 40
+  setpoint_max: 55
   control_interval: 60
   weather_feedforward:
     base: 25
@@ -16,7 +17,28 @@ hvac:
     beta1: 15
     beta2: 380
   zones:
-    - name: living_room
-      temperature: sensor.living_room_temperature
+    - name: bathroom
+      temperature: sensor.bathroom_sonoff_snzb_02d_temperature
       thermostats:
-        - climate.living_room
+        - climate.bathroom_generic_thermostat
+    - name: living_room
+      temperature: sensor.livingroom_sonoff_snzb_02d_temperature
+      thermostats:
+        - climate.livingroom_sonoff_trvzb_thermostat
+        - climate.livingroom_sonoff_trvzb_thermostat_2
+    - name: children_bedroom
+      temperature: sensor.childroom_sonoff_snzb_02d_temperature
+      thermostats:
+        - climate.childroom_sonoff_trvzb_thermostat
+    - name: kitchen
+      temperature: sensor.kitchen_sonoff_snzb_02d_temperature
+      thermostats:
+        - climate.kitchen_generic_thermostat
+    - name: bedroom
+      temperature: sensor.bedroom_sonoff_snzb_02d_temperature
+      thermostats:
+        - climate.bedroom_sonoff_trvzb_thermostat
+    - name: wc
+      temperature: sensor.wc_sonoff_snzb_02d_temperature
+      thermostats:
+        - climate.wc_generic_thermostat
