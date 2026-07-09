@@ -3,11 +3,24 @@
 import math
 
 from hvac.ladrc import LadrcState
-from hvac.models import LadrcConfig
+from hvac.models import LadrcConfig, LadrcTuneConfig
 
 
 def _default_config() -> LadrcConfig:
-    return LadrcConfig(b0=2.8, kp=0.053, beta1=15, beta2=380, dt=60.0)
+    return LadrcConfig(
+        b0=2.8,
+        omega_o=19.49,
+        omega_c=0.053,
+        omega_c_min=0.02,
+        omega_c_max=0.15,
+        tune=LadrcTuneConfig(
+            ki=0.005,
+            deadband=0.2,
+            min_steady_ticks=5,
+            max_rate_fraction=0.05,
+        ),
+        dt=60.0,
+    )
 
 
 def test_compute_tracking_returns_finite_u_track():
