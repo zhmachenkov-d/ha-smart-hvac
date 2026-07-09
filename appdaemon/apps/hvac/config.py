@@ -67,9 +67,12 @@ def _parse_ladrc(raw: Any, control_interval: int) -> LadrcConfig:
 def parse_config(args: dict[str, Any]) -> HvacConfig:
     """Parse AppDaemon app arguments into a validated HvacConfig."""
     outdoor_temperature = _require(args, "outdoor_temperature")
+    plant_management = _require(args, "plant_management")
     plant_setpoint = _require(args, "plant_setpoint")
     if not isinstance(outdoor_temperature, str) or not outdoor_temperature:
         raise ConfigError("outdoor_temperature must be a non-empty entity id")
+    if not isinstance(plant_management, str) or not plant_management:
+        raise ConfigError("plant_management must be a non-empty entity id")
     if not isinstance(plant_setpoint, str) or not plant_setpoint:
         raise ConfigError("plant_setpoint must be a non-empty entity id")
 
@@ -88,6 +91,7 @@ def parse_config(args: dict[str, Any]) -> HvacConfig:
 
     return HvacConfig(
         outdoor_temperature=outdoor_temperature,
+        plant_management=plant_management,
         plant_setpoint=plant_setpoint,
         setpoint_min=setpoint_min,
         setpoint_max=setpoint_max,
