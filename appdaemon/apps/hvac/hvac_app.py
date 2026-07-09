@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import appdaemon.plugins.hass.hassapi as hass
 
 from hvac.config import ConfigError, parse_config
@@ -28,7 +26,7 @@ class HvacApp(hass.Hass):
             return
 
         self._ladrc = LadrcState()
-        tune_state_path = Path(self.get_app_path()) / self._config.tune_state_path
+        tune_state_path = self.app_dir / self._config.tune_state_path
         self._tuner = LadrcTuner(self._config.ladrc, tune_state_path)
         self.run_every(
             self.control_tick,
@@ -72,6 +70,7 @@ class HvacApp(hass.Hass):
             tracking_error,
             decision.critical_zone,
             decision.has_demand,
+            apply=False,
         )
         effective_ladrc = config.ladrc.with_omega_c(
             new_omega_c if new_omega_c is not None else self._tuner.omega_c
@@ -92,6 +91,8 @@ class HvacApp(hass.Hass):
             return
 
         self._ladrc.advance(decision.measured, command, effective_ladrc)
+        if new_omega_c is not None:
+            self._tuner.commit_omega_c(new_omega_c)
         self._tuner.publish_sensor(self)
         self.log(
             f"Critical zone {decision.critical_zone}: "

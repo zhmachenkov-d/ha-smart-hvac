@@ -41,6 +41,8 @@ class LadrcTuner:
         tracking_error: float,
         critical_zone: str,
         has_demand: bool,
+        *,
+        apply: bool = True,
     ) -> float | None:
         if not has_demand:
             self._steady_ticks = 0
@@ -72,9 +74,14 @@ class LadrcTuner:
         if new_omega_c == self._omega_c:
             return None
 
-        self._omega_c = new_omega_c
-        self._persist()
+        if apply:
+            self._omega_c = new_omega_c
+            self._persist()
         return new_omega_c
+
+    def commit_omega_c(self, omega_c: float) -> None:
+        self._omega_c = omega_c
+        self._persist()
 
     def publish_sensor(self, app: _SensorPublisher) -> None:
         app.set_state(
@@ -91,7 +98,7 @@ class LadrcTuner:
             omega_c = float(raw["omega_c"])
         except (OSError, TypeError, ValueError, KeyError, json.JSONDecodeError):
             return
-        if not self._config.omega_c_min < omega_c < self._config.omega_c_max:
+        if not self._config.omega_c_min <= omega_c <= self._config.omega_c_max:
             return
         self._omega_c = omega_c
 

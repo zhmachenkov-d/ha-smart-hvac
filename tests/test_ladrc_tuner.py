@@ -148,6 +148,30 @@ def test_corrupt_json_falls_back_to_config_initial(tmp_path: Path) -> None:
     assert tuner.omega_c == pytest.approx(0.053)
 
 
+def test_boundary_persisted_value_reloaded(tmp_path: Path) -> None:
+    state_path = tmp_path / "ladrc_tune_state.json"
+    state_path.write_text(json.dumps({"omega_c": 0.15}), encoding="utf-8")
+    reloaded = LadrcTuner(_default_config(), state_path)
+    assert reloaded.omega_c == pytest.approx(0.15)
+
+
+def test_maybe_adapt_deferred_apply(tmp_path: Path) -> None:
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = _tuner(tmp_path)
+    proposed: float | None = None
+    for _ in range(5):
+        proposed = tuner.maybe_adapt(1.0, "living_room", has_demand=True, apply=False)
+    assert proposed is not None
+    assert tuner.omega_c == pytest.approx(0.053)
+    assert not state_path.is_file()
+
+    tuner.commit_omega_c(proposed)
+    assert tuner.omega_c == pytest.approx(proposed)
+    assert state_path.is_file()
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(proposed)
+
+
 def test_out_of_bounds_persisted_value_ignored(tmp_path: Path) -> None:
     state_path = tmp_path / "ladrc_tune_state.json"
     state_path.write_text(json.dumps({"omega_c": 0.5}), encoding="utf-8")
