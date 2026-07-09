@@ -80,6 +80,18 @@ _Avoid_: Smith predictor (related delay idea, different structure), plain LADRC 
 The ADRC/LADRC observer that estimates the measured output and an extra state for total disturbance. Depth: `knowledge/concepts/extended-state-observer.md`.
 _Avoid_: Kalman filter (different observer family unless explicitly choosing it)
 
+**Controller Bandwidth (ωc)**:
+The LADRC outer-loop bandwidth; maps to `kp`. Online auto-tune adjusts this.
+_Avoid_: Proportional gain (informal; use Controller Bandwidth when discussing ωc)
+
+**Observer Bandwidth (ωo)**:
+The ESO bandwidth; maps to `beta2 = ωo²`. Fixed at config time.
+_Avoid_: Observer gain (informal unless referring to discrete `g1`/`g2`)
+
+**LADRC Auto-Tune**:
+Slow online adjustment of ωc from sustained Critical Zone tracking error (`reference − z₁`), with conservative guards (steady-zone, deadband, rate limit, bounds, freeze on Critical Zone switch).
+_Avoid_: Relay tuning, commissioning step tests (out of scope for online auto-tune)
+
 ## Example dialogue
 
 > **Dev:** When I change the thermostat schedule logic, am I editing Home Assistant or an App?

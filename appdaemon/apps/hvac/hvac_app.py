@@ -8,6 +8,7 @@ from hvac.config import ConfigError, parse_config
 from hvac.coordinator import select_critical_zone
 from hvac.feedforward import weather_feedforward
 from hvac.ladrc import LadrcState
+from hvac.ladrc_tuner import LadrcTuner
 from hvac.models import (
     HvacConfig,
     ThermostatReading,
@@ -25,6 +26,8 @@ class HvacApp(hass.Hass):
             return
 
         self._ladrc = LadrcState()
+        tune_state_path = self.app_dir / self._config.tune_state_path
+        self._tuner = LadrcTuner(self._config.ladrc, tune_state_path)
         self.run_every(
             self.control_tick,
             "now",
@@ -54,6 +57,7 @@ class HvacApp(hass.Hass):
 
         if not decision.has_demand:
             self._ladrc.clear()
+            self._tuner.clear_steady()
             self._write_setpoint(0.0)
             self.log(
                 f"No heating demand (max zone error {decision.zone_error:.2f} °C); "
@@ -61,11 +65,22 @@ class HvacApp(hass.Hass):
             )
             return
 
+        tracking_error = decision.reference - self._ladrc.z1
+        new_omega_c = self._tuner.maybe_adapt(
+            tracking_error,
+            decision.critical_zone,
+            decision.has_demand,
+            apply=False,
+        )
+        effective_ladrc = config.ladrc.with_omega_c(
+            new_omega_c if new_omega_c is not None else self._tuner.omega_c
+        )
+
         u_ff = weather_feedforward(outdoor, config.weather_feedforward)
         u_track = self._ladrc.compute_tracking(
             measured=decision.measured,
             reference=decision.reference,
-            config=config.ladrc,
+            config=effective_ladrc,
             critical_zone=decision.critical_zone,
         )
         command = max(
@@ -75,7 +90,10 @@ class HvacApp(hass.Hass):
         if not self._write_setpoint(command):
             return
 
-        self._ladrc.advance(decision.measured, command, config.ladrc)
+        self._ladrc.advance(decision.measured, command, effective_ladrc)
+        if new_omega_c is not None:
+            self._tuner.commit_omega_c(new_omega_c)
+        self._tuner.publish_sensor(self)
         self.log(
             f"Critical zone {decision.critical_zone}: "
             f"error={decision.zone_error:.2f} °C, "
@@ -85,10 +103,12 @@ class HvacApp(hass.Hass):
 
     def _hands_off(self, message: str) -> None:
         self._ladrc.clear()
+        self._tuner.clear_steady()
         self.log(message, level="WARNING")
 
     def _go_idle(self, message: str) -> None:
         self._ladrc.clear()
+        self._tuner.clear_steady()
         self._write_setpoint(0.0)
         self.log(message, level="WARNING")
 

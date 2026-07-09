@@ -7,6 +7,7 @@ from typing import Any
 from hvac.models import (
     HvacConfig,
     LadrcConfig,
+    LadrcTuneConfig,
     WeatherFeedforwardConfig,
     ZoneConfig,
 )
@@ -52,14 +53,42 @@ def _parse_weather_feedforward(raw: Any) -> WeatherFeedforwardConfig:
     )
 
 
+def _parse_ladrc_tune(raw: Any) -> LadrcTuneConfig:
+    if not isinstance(raw, dict):
+        raise ConfigError("ladrc.tune must be a mapping")
+    min_steady_ticks = int(_require(raw, "min_steady_ticks"))
+    if min_steady_ticks <= 0:
+        raise ConfigError("ladrc.tune.min_steady_ticks must be positive")
+    max_rate_fraction = float(_require(raw, "max_rate_fraction"))
+    if max_rate_fraction <= 0:
+        raise ConfigError("ladrc.tune.max_rate_fraction must be positive")
+    return LadrcTuneConfig(
+        ki=float(_require(raw, "ki")),
+        deadband=float(_require(raw, "deadband")),
+        min_steady_ticks=min_steady_ticks,
+        max_rate_fraction=max_rate_fraction,
+    )
+
+
 def _parse_ladrc(raw: Any, control_interval: int) -> LadrcConfig:
     if not isinstance(raw, dict):
         raise ConfigError("ladrc must be a mapping")
+    omega_c_min = float(_require(raw, "omega_c_min"))
+    omega_c_max = float(_require(raw, "omega_c_max"))
+    omega_c = float(_require(raw, "omega_c"))
+    if omega_c_min >= omega_c_max:
+        raise ConfigError("ladrc.omega_c_min must be less than ladrc.omega_c_max")
+    if not omega_c_min < omega_c < omega_c_max:
+        raise ConfigError(
+            "ladrc.omega_c must be strictly between omega_c_min and omega_c_max"
+        )
     return LadrcConfig(
         b0=float(_require(raw, "b0")),
-        kp=float(_require(raw, "kp")),
-        beta1=float(_require(raw, "beta1")),
-        beta2=float(_require(raw, "beta2")),
+        omega_o=float(_require(raw, "omega_o")),
+        omega_c=omega_c,
+        omega_c_min=omega_c_min,
+        omega_c_max=omega_c_max,
+        tune=_parse_ladrc_tune(_require(raw, "tune")),
         dt=float(control_interval),
     )
 
@@ -89,6 +118,10 @@ def parse_config(args: dict[str, Any]) -> HvacConfig:
     if not isinstance(zones_raw, list) or not zones_raw:
         raise ConfigError("zones must be a non-empty list")
 
+    tune_state_path = args.get("tune_state_path", "ladrc_tune_state.json")
+    if not isinstance(tune_state_path, str) or not tune_state_path:
+        raise ConfigError("tune_state_path must be a non-empty string")
+
     return HvacConfig(
         outdoor_temperature=outdoor_temperature,
         plant_management=plant_management,
@@ -100,5 +133,6 @@ def parse_config(args: dict[str, Any]) -> HvacConfig:
             _require(args, "weather_feedforward")
         ),
         ladrc=_parse_ladrc(_require(args, "ladrc"), control_interval),
+        tune_state_path=tune_state_path,
         zones=tuple(_parse_zone(z) for z in zones_raw),
     )
