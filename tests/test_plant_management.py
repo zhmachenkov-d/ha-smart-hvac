@@ -1,6 +1,7 @@
 """Tests for Plant Management gate."""
 
 import pytest
+
 from hvac.models import plant_management_enabled
 
 

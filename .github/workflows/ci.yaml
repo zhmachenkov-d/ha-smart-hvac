@@ -17,8 +17,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --frozen --group dev
-      - run: uv run ruff check appdaemon tests
-      - run: uv run ruff format --check appdaemon tests
+      - run: uv run ruff check apps tests
+      - run: uv run ruff format --check apps tests
 
   test:
     runs-on: ubuntu-latest
