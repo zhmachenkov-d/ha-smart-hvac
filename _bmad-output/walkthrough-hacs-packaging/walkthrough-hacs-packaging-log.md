@@ -60,3 +60,12 @@ Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:36:30+
 - Result: automated checks executed; Exclusive Session live HA run not performed (policy).
 - Evidence: tests/test_dual_layout.py; uv run pytest; uv run ruff; apps/hvac vs appdaemon/apps.
 - Open: Live Exclusive Session against HA still unverified by policy.
+
+## 8 — Session — sync main after PR #9 merge
+
+Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:39:00+03:00
+
+- Action: User asked to update local main and continue walkthrough after PR #9 merge.
+- Result: Local main fast-forwarded to merge commit; Broad strokes remains current block.
+- Evidence: PR #9 MERGED; origin/main at f28fbe5.
+- Open: Broad strokes acceptance.
