@@ -72,7 +72,14 @@ That resolves to `<repo>/apps`, where `hvac/` and your local `apps.yaml` live.
 
 ### 2. Production AppDaemon add-on (this house)
 
-The Production add-on keeps its own config under Home Assistant’s add-on config tree (typically `addon_configs/<slug>_appdaemon/` on the HA host), not under this git checkout. Point that add-on’s `app_dir` at **wherever this deployment keeps its apps and `apps.yaml`** — for example the add-on’s own `apps/` directory if you deploy the package there, or another path you already use for Production. Do not copy live house entity IDs into the public tree; keep Production wiring on the HA host only.
+The Production add-on keeps its own config under Home Assistant’s add-on config tree (`addon_configs/<slug>_appdaemon/` on the HA host), not under this git checkout. Point that add-on’s `app_dir` at the add-on’s apps directory (replace `<slug>` with your AppDaemon add-on slug). Do not copy live house entity IDs into the public tree; keep Production wiring on the HA host only.
+
+```yaml
+appdaemon:
+  # HAOS add-on config tree; replace <slug> with your AppDaemon add-on slug
+  app_dir: /addon_configs/<slug>_appdaemon/apps
+```
+
 
 ### 3. Stranger HACS install (after a future public custom-repo publish)
 
