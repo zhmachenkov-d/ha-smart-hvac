@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HACS AppDaemon feasibility — research briefing</title>
+<style>
+:root { --bg:#f7f7f5; --fg:#1a1a1a; --muted:#5c5c5c; --card:#fff; --accent:#0b6e4f; --border:#e2e2de;
+  --ok:#0b6e4f; --med:#8a6d00; --low:#a33; --unv:#8a2b0a; }
+@media (prefers-color-scheme: dark) {
+:root { --bg:#121411; --fg:#ecece8; --muted:#a0a098; --card:#1c1e1b; --accent:#5dcea3; --border:#2c2f2a; }
+}
+* { box-sizing:border-box; }
+body { margin:0; font:16px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+header,main { max-width:880px; margin:0 auto; padding:1.25rem; }
+header { padding-top:2rem; }
+.meta { color:var(--muted); font-size:.9rem; display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.25rem; margin:1rem 0; }
+h1 { font-size:1.6rem; margin:.2rem 0 0.6rem; }
+h2 { font-size:1.2rem; margin-top:2rem; }
+nav.toc { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--border); padding:.6rem 0; z-index:2; }
+nav.toc a { color:var(--accent); margin-right:.9rem; text-decoration:none; font-size:.9rem; }
+.badge { display:inline-block; font-size:.75rem; font-weight:600; padding:.15rem .45rem; border-radius:4px; border:1px solid currentColor; }
+.badge.verified { color:var(--ok); }
+.badge.medium { color:var(--med); }
+.badge.unverified { color:var(--unv); background:rgba(138,43,10,.08); }
+ul { padding-left:1.2rem; }
+a { color:var(--accent); }
+table { width:100%; border-collapse:collapse; font-size:.9rem; }
+th,td { border:1px solid var(--border); padding:.45rem .55rem; text-align:left; vertical-align:top; }
+details { margin:1rem 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="meta">
+    <span>Type: technical</span>
+    <span>Preset: standard-straightforward</span>
+    <span>Validation: normal</span>
+    <span>2026-10-02</span>
+    <span>Claims: 6 verified / 2 unverified</span>
+  </div>
+  <h1>HACS AppDaemon feasibility for ha-smart-hvac</h1>
+  <p><strong>Decision:</strong> Can this project be packaged/distributed as a HACS AppDaemon extension, and what would that require?</p>
+</header>
+<main>
+<nav class="toc">
+  <a href="#summary">Summary</a>
+  <a href="#landscape">Landscape</a>
+  <a href="#packaging">Packaging</a>
+  <a href="#implementation">Implementation</a>
+  <a href="#ecosystem">Ecosystem</a>
+  <a href="#recs">Recommendations</a>
+  <a href="#sources">Sources</a>
+</nav>
+
+<section id="summary" class="card">
+  <h2>Executive summary</h2>
+  <p><strong>Yes — as a HACS AppDaemon app, not as a HA custom integration, and not with the current layout as-is.</strong></p>
+  <p>HACS has a first-class AppDaemon category <span class="badge verified">verified</span>. The blocker is structure: HACS needs <code>apps/&lt;name&gt;/</code> at repo root; this repo nests under <code>appdaemon/apps/hvac/</code>. Ship a custom repository first; default-store inclusion is optional and slow <span class="badge medium">medium</span>.</p>
+</section>
+
+<section id="landscape">
+  <h2>Landscape &amp; maturity</h2>
+  <div class="card">
+    <ul>
+      <li>Dedicated AppDaemon publish path + template (<code>ad-hacs</code>) <span class="badge verified">verified</span></li>
+      <li>Discovery opt-in — niche audience <span class="badge verified">verified</span></li>
+      <li>56 defaults; Action supports <code>category: appdaemon</code> <span class="badge verified">verified</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="packaging">
+  <h2>Integration &amp; packaging</h2>
+  <div class="card">
+    <ul>
+      <li>Root <code>apps/APP_NAME/</code>, one app only; root <code>hacs.json</code> with <code>name</code>; public GitHub + README/topics/description <span class="badge verified">verified</span></li>
+      <li>Downloads into <code>&lt;config&gt;/appdaemon/apps/*</code> <span class="badge verified">verified</span></li>
+      <li>Custom repo immediately; default list PR can take months <span class="badge unverified">unverified</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="implementation">
+  <h2>Implementation reality</h2>
+  <div class="card">
+    <ul>
+      <li>Peers keep <code>apps/</code> at repo root (ControllerX pattern) <span class="badge verified">verified</span></li>
+      <li>This repo: nested <code>appdaemon/apps/</code>, no <code>hacs.json</code>, house IDs in <code>apps.yaml</code> — packaging work required</li>
+      <li>HAOS users may need <code>app_dir</code> aligned to HACS path <span class="badge verified">verified</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="ecosystem">
+  <h2>Ecosystem health</h2>
+  <div class="card">
+    <p>Category still maintained; quieter than integrations. Custom repository avoids default backlog. No documented deprecation.</p>
+  </div>
+</section>
+
+<section id="recs">
+  <h2>Recommendations</h2>
+  <div class="card">
+    <ol>
+      <li>Treat HACS AppDaemon packaging as feasible</li>
+      <li>Do not publish as-is — reshape to root <code>apps/hvac/</code></li>
+      <li>Prefer AppDaemon packaging over rewriting as a HA integration</li>
+      <li>Custom repository first; defer <code>hacs/default</code></li>
+      <li>Document <code>app_dir</code> for HAOS users</li>
+    </ol>
+  </div>
+</section>
+
+<details id="sources" open>
+  <summary><h2 style="display:inline">Source appendix</h2></summary>
+  <table class="sources"><tbody><tr id="src-1"><td>[1]</td><td>AppDaemon structure rules; one app under `apps/`</td><td><a href="https://www.hacs.xyz/docs/publish/appdaemon/" target="_blank" rel="noopener">HACS publish — AppDaemon</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-2"><td>[2]</td><td>Discovery off by default; small-subset framing</td><td><a href="https://www.hacs.xyz/docs/use/repositories/type/appdaemon/" target="_blank" rel="noopener">HACS use — AppDaemon</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-3"><td>[3]</td><td>Official template `ludeeus/ad-hacs` layout</td><td><a href="https://github.com/ludeeus/ad-hacs/" target="_blank" rel="noopener">ludeeus/ad-hacs</a></td><td>repo live</td><td>2026-10-02</td><td>high</td></tr><tr id="src-4"><td>[4]</td><td>HACS Action `category: appdaemon`</td><td><a href="https://www.hacs.xyz/docs/publish/action/" target="_blank" rel="noopener">HACS publish — Action</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-5"><td>[5]</td><td>Downloads first `apps/` dir to `&lt;config&gt;/appdaemon/apps/*`</td><td><a href="https://manifest--hacs.netlify.app/faq/" target="_blank" rel="noopener">HACS FAQ (mirror)</a></td><td>docs mirror</td><td>2026-10-02</td><td>high</td></tr><tr id="src-6"><td>[6]</td><td>Download location under HA config `appdaemon/apps/`</td><td><a href="https://www.hacs.xyz/docs/use/repositories/type/appdaemon/" target="_blank" rel="noopener">HACS use — AppDaemon</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-7"><td>[7]</td><td>56 default AppDaemon repos</td><td><a href="https://raw.githubusercontent.com/hacs/default/master/appdaemon" target="_blank" rel="noopener">hacs/default `appdaemon`</a></td><td>2026-10-02 fetch</td><td>2026-10-02</td><td>high</td></tr><tr id="src-8"><td>[8]</td><td>General requirements incl. `hacs.json`, releases</td><td><a href="https://www.hacs.xyz/docs/publish/start/" target="_blank" rel="noopener">HACS publish — General</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-9"><td>[9]</td><td>Default inclusion process; months backlog</td><td><a href="https://www.hacs.xyz/docs/publish/include/" target="_blank" rel="noopener">HACS publish — Include</a></td><td>live docs</td><td>2026-10-02</td><td>medium</td></tr><tr id="src-10"><td>[10]</td><td>Add-on path vs HACS path; `app_dir` workaround</td><td><a href="https://github.com/hacs/integration/issues/4442" target="_blank" rel="noopener">hacs/integration#4442</a></td><td>issue thread</td><td>2026-10-02</td><td>high</td></tr><tr id="src-11"><td>[11]</td><td>ControllerX active AppDaemon HACS package pattern</td><td><a href="https://github.com/xaviml/controllerx" target="_blank" rel="noopener">xaviml/controllerx</a></td><td>2026-09-28 push</td><td>2026-10-02</td><td>high</td></tr><tr id="src-12"><td>[12]</td><td>Custom repositories FAQ</td><td><a href="https://www.hacs.xyz/docs/faq/custom_repositories/" target="_blank" rel="noopener">HACS FAQ — Custom repositories</a></td><td>live docs</td><td>2026-10-02</td><td>high</td></tr><tr id="src-13"><td>[13]</td><td>appdaemon list still maintained (archived removals)</td><td><a href="https://api.github.com/repos/hacs/default/commits?path=appdaemon&amp;per_page=5" target="_blank" rel="noopener">hacs/default commits `path=appdaemon`</a></td><td>2026-01-07</td><td>2026-10-02</td><td>high</td></tr></tbody></table>
+</details>
+
+<section class="card">
+  <h2>Staleness</h2>
+  <p>Earliest Refresh: <strong>2026-11-01</strong> (version/compatibility docs).</p>
+</section>
+</main>
+</body>
+</html>
