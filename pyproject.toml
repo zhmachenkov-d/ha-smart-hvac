@@ -13,7 +13,7 @@ pythonpath = ["appdaemon/apps"]
 [tool.ruff]
 target-version = "py312"
 src = ["appdaemon", "tests"]
-exclude = [".cursor"]
+exclude = [".cursor", ".agents", "_bmad"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
