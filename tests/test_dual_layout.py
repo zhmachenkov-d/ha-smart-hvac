@@ -52,9 +52,10 @@ def test_history_has_no_live_apps_yaml_entity_ids():
 
 def test_readme_production_and_stranger_app_dir_examples():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "addon_configs/" in readme
-    assert "app_dir: /addon_configs/<slug>_appdaemon/apps" in readme
+    assert "addon_configs/a0d7b954_appdaemon" in readme
+    assert "app_dir: /config/apps" in readme
     assert "app_dir: /config/appdaemon/apps" in readme
     assert "hacs/integration#4442" in readme
     assert "public-readiness" in readme
     assert "hacs.json" in readme
+    assert "appdaemon.readthedocs.io" in readme

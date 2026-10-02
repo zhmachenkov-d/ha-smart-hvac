@@ -72,12 +72,12 @@ That resolves to `<repo>/apps`, where `hvac/` and your local `apps.yaml` live.
 
 ### 2. Production AppDaemon add-on (this house)
 
-The Production add-on keeps its own config under Home Assistant’s add-on config tree (`addon_configs/<slug>_appdaemon/` on the HA host), not under this git checkout. Point that add-on’s `app_dir` at the add-on’s apps directory (replace `<slug>` with your AppDaemon add-on slug). Do not copy live house entity IDs into the public tree; keep Production wiring on the HA host only.
+Per the [AppDaemon add-on Paths](https://appdaemon.readthedocs.io/en/latest/ADDON.html#paths) table, add-on config is `/config` inside the container (Samba/host: `addon_configs/a0d7b954_appdaemon`). AppDaemon’s default apps directory is `./apps` under that config — i.e. `/config/apps` in the container. You can omit `app_dir` or set it explicitly; keep house wiring on the HA host only (not in this git tree).
 
 ```yaml
 appdaemon:
-  # HAOS add-on config tree; replace <slug> with your AppDaemon add-on slug
-  app_dir: /addon_configs/<slug>_appdaemon/apps
+  # Explicit form of the add-on default (./apps under /config)
+  app_dir: /config/apps
 ```
 
 
