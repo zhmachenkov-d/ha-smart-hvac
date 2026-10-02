@@ -3,17 +3,17 @@ repos:
     rev: v0.15.20
     hooks:
       - id: ruff-check
-        args: [--fix, appdaemon, tests]
-        files: ^(appdaemon|tests)/
+        args: [--fix, apps, tests]
+        files: ^(apps|tests)/
       - id: ruff-format
-        args: [appdaemon, tests]
-        files: ^(appdaemon|tests)/
+        args: [apps, tests]
+        files: ^(apps|tests)/
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: no-commit-to-branch
         args: [--branch, main]
       - id: trailing-whitespace
-        files: ^(appdaemon|tests)/
+        files: ^(apps|tests)/
       - id: end-of-file-fixer
-        files: ^(appdaemon|tests)/
+        files: ^(apps|tests)/

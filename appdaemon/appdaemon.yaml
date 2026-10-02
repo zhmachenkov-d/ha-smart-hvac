@@ -5,6 +5,8 @@ appdaemon:
   latitude: 0.0
   longitude: 0.0
   elevation: 0
+  # Relative to config_dir (appdaemon/). Loads repo-root apps/ for Exclusive Session.
+  app_dir: ../apps
   plugins:
     HASS:
       type: hass
