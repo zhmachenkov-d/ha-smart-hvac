@@ -51,3 +51,12 @@ Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:36:00+
 - Action: User approved committing walkthrough artifacts; committed and pushed `_bmad-output/walkthrough-hacs-packaging/` (left party-mode untracked).
 - Result: Broad strokes still current; commit on feat/public-readiness-prep.
 - Evidence: git log -1; PR #9.
+
+## 7 — Broad strokes — Test
+
+Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:36:30+03:00
+
+- Action: User selected Test on Broad strokes; ran dual-layout pytest, full suite, ruff, and layout spot checks.
+- Result: automated checks executed; Exclusive Session live HA run not performed (policy).
+- Evidence: tests/test_dual_layout.py; uv run pytest; uv run ruff; apps/hvac vs appdaemon/apps.
+- Open: Live Exclusive Session against HA still unverified by policy.
