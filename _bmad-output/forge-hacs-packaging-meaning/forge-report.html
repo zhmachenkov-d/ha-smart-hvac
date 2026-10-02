@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forge Report — HACS packaging meaning</title>
+  <style>
+    :root {
+      --ink: #1a1410;
+      --paper: #f3ebe0;
+      --rule: #c4b5a0;
+      --accent: #8b1e1e;
+      --seal: #6b1515;
+      --muted: #5c5348;
+      --card: #fffaf3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background:
+        radial-gradient(ellipse at 20% 0%, #fff8ee 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 10%, #e8dcc8 0%, transparent 40%),
+        var(--paper);
+      color: var(--ink);
+      line-height: 1.45;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.35rem;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .seal {
+      width: 7.5rem;
+      height: 7.5rem;
+      flex-shrink: 0;
+    }
+    .seal text {
+      fill: #f5e6d3;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.35rem;
+      margin: 1.75rem 0 0.75rem;
+    }
+    ul {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+    li { margin: 0.35rem 0; }
+    .rejected li::marker { color: var(--accent); }
+    .voices {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+    .voice {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      padding: 0.65rem 0.85rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: start;
+    }
+    .icon {
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+    .voice strong { display: block; font-size: 0.95rem; }
+    .voice span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: ui-monospace, "Cascadia Code", Menlo, monospace;
+      font-size: 0.88em;
+      background: #ebe1d2;
+      padding: 0.05em 0.3em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>HACS packaging meaning for ha-smart-hvac</h1>
+        <p class="meta">Forge outcome · 2026-10-02 · clarify → hardened</p>
+        <p class="meta">Workspace: <code>_bmad-output/forge-hacs-packaging-meaning/</code></p>
+      </div>
+      <svg class="seal" viewBox="0 0 120 120" role="img" aria-label="HARDENED">
+        <defs>
+          <radialGradient id="wax" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#a82424"/>
+            <stop offset="55%" stop-color="#7a1616"/>
+            <stop offset="100%" stop-color="#4a0c0c"/>
+          </radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="56" fill="url(#wax)" stroke="#3a0808" stroke-width="2"/>
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#f5e6d3" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.85"/>
+        <text x="60" y="56" text-anchor="middle" font-size="11">HARDENED</text>
+        <text x="60" y="72" text-anchor="middle" font-size="8" opacity="0.9">IDEA SEAL</text>
+      </svg>
+    </header>
+
+    <h2>Outcome</h2>
+    <p>
+      “HACS packaging” for this project means: reshape the monorepo so repo-root
+      <code>apps/hvac/</code> is canonical, Exclusive Session reaches it via
+      <code>app_dir</code>, ship a custom-repo publish surface from this repo once it is
+      public — after history hygiene — and stop at custom-repo (not default store).
+    </p>
+
+    <h2>Locked decisions</h2>
+    <ul>
+      <li>Same monorepo dual layout (not extract/mirror).</li>
+      <li>Canonical Python: <code>apps/hvac/</code>; Exclusive Session adapts.</li>
+      <li>Bridge: <code>app_dir</code> → repo-root <code>apps/</code> (not symlink).</li>
+      <li>House <code>apps.yaml</code> gitignored; commit <code>apps.yaml.example</code> only.</li>
+      <li>Publish surface: <code>hacs.json</code>, HACS Action, releases, stranger <code>app_dir</code> docs.</li>
+      <li>Vehicle: this repo made public; gated on history rewrite/filter.</li>
+      <li>Ceiling: public custom repository only.</li>
+    </ul>
+
+    <h2>Rejected</h2>
+    <ul class="rejected">
+      <li>Packaging mirror / extract repo — one tree preferred.</li>
+      <li>Keep <code>appdaemon/apps/hvac/</code> canonical with a HACS façade.</li>
+      <li>Symlink bridge — <code>app_dir</code> chosen instead.</li>
+      <li>Layout-only meaning — publish knobs included.</li>
+      <li>Accept house IDs forever in public git history.</li>
+      <li><code>hacs/default</code> inclusion — out of scope.</li>
+    </ul>
+
+    <h2>Weak points that survived</h2>
+    <ul>
+      <li><code>app_dir</code> puts house wiring under the HACS-shaped <code>apps/</code> tree — hygiene depends on gitignore + example discipline.</li>
+      <li>History rewrite before public is operational risk (force-push / coordination) — accepted as a gate, not solved here.</li>
+      <li>Repo is private today; HACS installability is blocked until visibility + hygiene land.</li>
+    </ul>
+
+    <h2>Pressure-testers</h2>
+    <div class="voices">
+      <div class="voice"><div class="icon">🏗️</div><div><strong>Winston</strong> <span>System Architect — dual-layout contracts, package vs config trees</span></div></div>
+      <div class="voice"><div class="icon">💻</div><div><strong>Amelia</strong> <span>Senior Software Engineer — symlink / path realism</span></div></div>
+      <div class="voice"><div class="icon">📊</div><div><strong>Mary</strong> <span>Business Analyst — custom-repo vs default-store boundary</span></div></div>
+      <div class="voice"><div class="icon">📋</div><div><strong>John</strong> <span>Product Manager — layout readiness vs publish surface</span></div></div>
+      <div class="voice"><div class="icon">🔒</div><div><strong>Vex</strong> <span>Security Engineer — entity IDs as floor plan; history as publish</span></div></div>
+      <div class="voice"><div class="icon">🚢</div><div><strong>Dana</strong> <span>The Pragmatist — symlink vs gold-plating; 80% history tradeoff</span></div></div>
+      <div class="voice"><div class="icon">📏</div><div><strong>Level</strong> <span>Claim Checker — private repo vs HACS public requirement</span></div></div>
+      <div class="voice"><div class="icon">🪵</div><div><strong>Splinter</strong> <span>Consensus Challenger — reopen extract if visibility blocked</span></div></div>
+      <div class="voice"><div class="icon">🛑</div><div><strong>Killjoy</strong> <span>Loop Stopper — stop before inventing a release train / default store</span></div></div>
+      <div class="voice"><div class="icon">👤</div><div><strong>Nina</strong> <span>Generated HAOS operator — Exclusive Session vs HACS <code>app_dir</code> confusion</span></div></div>
+      <div class="voice"><div class="icon">👤</div><div><strong>Theo</strong> <span>Generated release engineer — dual copies rot</span></div></div>
+    </div>
+
+    <footer>
+      Artifact: <code>forge-hacs-packaging-meaning.md</code> · Memlog marked complete on harden.
+      Downstream: suitable input for <code>bmad-spec</code> / <code>bmad-prd</code> / <code>bmad-build</code> if you choose to act.
+    </footer>
+  </main>
+</body>
+</html>
