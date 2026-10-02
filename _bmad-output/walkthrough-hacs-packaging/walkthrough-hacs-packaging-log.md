@@ -43,3 +43,11 @@ Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:35:00+
 - Action: User marked Intent done; presented Broad strokes.
 - Result: Intent accepted; Broad strokes current. Dirty tree: untracked walkthrough-hacs-packaging/ and party-mode/ — ask user about commit.
 - Evidence: narrative blocks list; PR #9.
+
+## 6 — Broad strokes — commit walkthrough artifacts
+
+Session: bc7189ed-b3ac-4651-b7c6-9875fc8cf030 · Timestamp: 2026-10-03T00:36:00+03:00
+
+- Action: User approved committing walkthrough artifacts; committed and pushed `_bmad-output/walkthrough-hacs-packaging/` (left party-mode untracked).
+- Result: Broad strokes still current; commit on feat/public-readiness-prep.
+- Evidence: git log -1; PR #9.
