@@ -2,7 +2,7 @@
 
 Target: [PR #15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) · branch `ci/conventional-commits-gate` · commit `a1a5e05`
 
-**Current block:** Slice: Offline matrix tests (in progress)
+**Current block:** Wrap-up (suggested)
 
 ## Blocks
 
@@ -10,8 +10,8 @@ Target: [PR #15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) · bran
 - [x] **Broad strokes** — done
 - [x] **Slice: PSR config** — done
 - [x] **Slice: Release workflow + auth** — done
-- [ ] **Slice: Offline matrix tests** — in progress
-- [ ] **Periphery**
+- [x] **Slice: Offline matrix tests** — done
+- [x] **Periphery** — done
 
 ### Intent
 
@@ -60,3 +60,7 @@ Mechanism: one test per I/O matrix row + shape guards; CI-safe (no local tag dep
 - [`deferred-work.md`](../deferred-work.md) — PSR entry still open until merge+verify
 - [`README.md`](../../README.md) — install step 3 note (automated Releases after merge)
 - Human secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`) — create before/at merge
+
+### Wrap-up
+
+All blocks accepted. Ship path is PR [#15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15). Before/at merge: create repo secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`). After merge+live verify: mark the PSR entry in [deferred-work.md](../deferred-work.md) done.

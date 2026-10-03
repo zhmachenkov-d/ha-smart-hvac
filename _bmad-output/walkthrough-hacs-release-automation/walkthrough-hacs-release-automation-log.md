@@ -82,3 +82,29 @@ Session: unavailable · Timestamp: 2026-10-03T18:09:00+03:00
 - Action: User asked to commit dirty walkthrough updates and push
 - Result: Local commit + push to origin; stay on Slice: Offline matrix tests
 - Evidence: walkthrough narrative/log; PR #15
+
+## 11 — Slice: Offline matrix tests — accepted
+
+Session: unavailable · Timestamp: 2026-10-03T18:09:30+03:00
+
+- Action: User said Slice: Offline matrix tests done
+- Result: Matrix tests accepted; advancing to Periphery
+- Evidence: tests/test_release_workflow.py
+
+## 12 — Periphery — accepted
+
+Session: unavailable · Timestamp: 2026-10-03T18:10:00+03:00
+
+- Action: User said Periphery done
+- Result: All blocks accepted; wrap-up suggested (merge PR #15, create SEMANTIC_RELEASE_TOKEN, close deferred PSR entry after verify)
+- Evidence: walkthrough-hacs-release-automation.md
+- Open: secret creation; deferred-work closeout after live verify
+
+## 13 — Wrap-up — commit push merge
+
+Session: unavailable · Timestamp: 2026-10-03T18:10:30+03:00
+
+- Action: User approved wrap-up; commit+push walkthrough; merge PR #15; secret blocked (gh secret 403)
+- Result: Walkthrough finalized on branch; merge attempted; SEMANTIC_RELEASE_TOKEN left for human; deferred-work not closed pending live verify
+- Evidence: PR #15; walkthrough wrap-up section
+- Open: create SEMANTIC_RELEASE_TOKEN; live Release run; deferred-work PSR done mark
