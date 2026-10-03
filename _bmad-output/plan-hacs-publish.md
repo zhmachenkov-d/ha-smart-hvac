@@ -79,12 +79,12 @@ context:
 - [x] `pyproject.toml` -- set `version = "0.1.0"` -- match release tag
 - [x] `README.md` -- install-first lead (HACS custom-repo path before dual-layout/dev); remove deferred/public-flip blocker language -- stranger sees install before philosophy
 - [x] `tests/test_dual_layout.py` -- drop `public-readiness`; add `hacs.json` + validate workflow + install-first README ordering asserts -- packaging invariants
-- [ ] Open PR, merge to `main` (human/CI green) -- knobs on default branch before Phase B
+- [x] Open PR, merge to `main` (human/CI green) -- knobs on default branch before Phase B
 
 **Execution — Phase B (after merge to `main`, agent via `gh`):**
 - [ ] GitHub description + topics -- set locked strings via `gh repo edit` -- HACS general publish metadata
-- [ ] First GitHub Release -- `gh release create v0.1.0 --target main` (published, not draft) -- HACS prefers releases; decision C + version A + agent publish
-- [ ] `_bmad-output/deferred-work.md` -- note HACS knobs entry completed -- close the deferred loop
+- [x] First GitHub Release -- `gh release create v0.1.0 --target main` (published, not draft) -- HACS prefers releases; decision C + version A + agent publish
+- [x] `_bmad-output/deferred-work.md` -- note HACS knobs entry completed -- close the deferred loop
 
 **Acceptance Criteria:**
 - Given Phase A on the feature branch, when Validate runs, then `hacs/action@main` uses `category: appdaemon` without ignoring `hacsjson`/structure checks.
@@ -102,7 +102,13 @@ context:
   - Rewrote `README.md` install-first: HACS custom-repo path before Layout / Exclusive Session; removed public-readiness / deferred-hacs / Public-visibility flip blocker framing.
   - Updated `tests/test_dual_layout.py`: dropped `public-readiness` / README `hacs.json` prose asserts; added `hacs.json` parse, validate-workflow, and install-before-Exclusive-Session ordering asserts.
   - Verified locally: `uv run pytest` (42 passed); `uv run ruff check apps tests && uv run ruff format --check apps tests` clean.
-  - Left incomplete: Phase A PR open/merge; all Phase B (`gh repo edit`, `gh release create v0.1.0`, deferred-work closeout). Validate workflow green only after push/PR.
+  - Left incomplete at that time: Phase A PR open/merge; all Phase B.
+- 2026-10-03 Phase A merge + Phase B (partial):
+  - Merged PR #11 to `main` (`cf9c59f`).
+  - Published Release `v0.1.0` targeting `main` (https://github.com/zhmachenkov-d/ha-smart-hvac/releases/tag/v0.1.0).
+  - `gh repo edit` description/topics failed HTTP 403 (PAT missing Administration); still empty — retry with a token that can update repository metadata, or set in GitHub UI.
+  - Deferred-work HACS knobs entry marked done with that residual noted.
+  - Validate may remain red until description/topics + license exist.
 
 ## Plan Change Log
 

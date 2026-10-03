@@ -103,3 +103,12 @@ Session: unavailable · Timestamp: 2026-10-03T10:54:30+03:00
 - Result: open — proposed merge PR #11 then Phase B; waiting for user confirmation before acting.
 - Evidence: plan-hacs-publish.md Phase A/B; PR #11
 - Open: user confirmation
+
+## 13 — Wrap-up — both (merge + Phase B)
+
+Session: unavailable · Timestamp: 2026-10-03T10:56:00+03:00
+
+- Action: User confirmed both; merged PR #11; ran Phase B.
+- Result: PR merged (`cf9c59f`); Release `v0.1.0` published; description/topics still empty (`gh repo edit` 403 PAT Administration); deferred-work marked done with residual noted.
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11 ; https://github.com/zhmachenkov-d/ha-smart-hvac/releases/tag/v0.1.0
+- Open: set description/topics (token or UI); license gap for Validate green
