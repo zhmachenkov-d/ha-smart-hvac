@@ -2,14 +2,14 @@
 
 Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · branch `feat/hacs-publish`
 
-**Current block:** Slice: HACS manifest + Validate
+**Current block:** Slice: install-first README
 
 ## Blocks
 
 - [x] **Intent** — done
 - [x] **Broad strokes** — done
-- [ ] **Slice: HACS manifest + Validate** — in progress (current)
-- [ ] **Slice: install-first README** — unvisited
+- [x] **Slice: HACS manifest + Validate** — done
+- [ ] **Slice: install-first README** — in progress (current)
 - [ ] **Slice: version + packaging tests** — unvisited
 - [ ] **Periphery** — unvisited
 
@@ -43,9 +43,17 @@ HACS needs a root name manifest and a Validate workflow that runs the same check
 - [`hacs.json`](../../hacs.json) — exactly `{"name": "ha-smart-hvac"}`.
 - [`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml) — `actions/checkout@v4` then `hacs/action@main` with `category: appdaemon`; triggers push/PR/schedule/`workflow_dispatch`; no `ignore` flags.
 
+**Review notes**
+
+- Validate CI still red on license/description/topics; `hacsjson` OK; accepted as Phase B + license gap.
+
 ### Slice: install-first README
 
-*(filled when visited)*
+Stranger path opens the README before dual-layout/dev material. HACS download only gets `hvac/`, so wiring instructions differ from Exclusive Session.
+
+- [`README.md`](../../README.md) — section **Install with HACS (custom repository)** leads after title/badge; custom-repo steps; `app_dir` for add-on vs HACS path; raw link to [`apps/apps.yaml.example`](../../apps/apps.yaml.example) for wiring beside downloaded `hvac/`.
+- Exclusive Session later uses in-repo `cp apps/apps.yaml.example apps/apps.yaml`.
+- Production / stranger `app_dir` examples kept under later `app_dir` section.
 
 ### Slice: version + packaging tests
 

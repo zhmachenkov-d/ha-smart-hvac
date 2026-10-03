@@ -43,3 +43,21 @@ Session: unavailable · Timestamp: 2026-10-03T10:48:00+03:00
 - Action: User accepted Broad strokes.
 - Result: Advance to Slice: HACS manifest + Validate; slice body filled.
 - Evidence: hacs.json; validate.yaml
+
+## 6 — Slice manifest+Validate — commit log
+
+Session: unavailable · Timestamp: 2026-10-03T10:48:30+03:00
+
+- Action: User said yes to commit dirty walkthrough log.
+- Result: docs commit pushed (parent fills hash).
+- Evidence: walkthrough-hacs-publish-log.md; narrative slice filled
+- Open: Validate failed earlier on license/description/topics; still on this slice
+
+## 7 — Slice manifest+Validate — done
+
+Session: unavailable · Timestamp: 2026-10-03T10:49:00+03:00
+
+- Action: User accepted slice despite Validate red on license/description/topics.
+- Result: Advance to install-first README; Validate gap open (license + Phase B metadata).
+- Evidence: gh Validate runs; hacs.json; validate.yaml
+- Open: license not in plan; description/topics Phase B
