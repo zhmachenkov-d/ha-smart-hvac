@@ -25,6 +25,8 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) for **git co
 - **Body** (optional): blank line after the subject; explain *why* or *how*; wrap long lines at ~72 characters.
 - **Footer** (optional): issue refs (`Refs #123`, `Closes #45`), `Co-authored-by:`, etc.
 
+**CI enforcement:** the `Conventional Commits` workflow (`.github/workflows/conventional-commits.yaml`) requires a Conventional Commits **PR title** and Conventional Commits subjects on every **non-merge** commit in `base…head`. Git merge commits (e.g. syncing `main` into a feature branch) are ignored by the commits job.
+
 **PR body** (separate from the title line): use these sections:
 
 - **Summary** — what changed and why (1–3 sentences or bullets)
