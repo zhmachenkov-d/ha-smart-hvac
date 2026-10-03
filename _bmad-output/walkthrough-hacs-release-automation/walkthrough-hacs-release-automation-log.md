@@ -66,3 +66,19 @@ Session: unavailable · Timestamp: 2026-10-03T18:08:00+03:00
 - Action: User asked to commit dirty walkthrough updates and push
 - Result: Local commit + push to origin; stay on Slice: Release workflow + auth
 - Evidence: walkthrough narrative/log; PR #15
+
+## 9 — Slice: Release workflow + auth — accepted
+
+Session: unavailable · Timestamp: 2026-10-03T18:08:30+03:00
+
+- Action: User said Slice: Release workflow + auth done
+- Result: Workflow+auth accepted; advancing to Slice: Offline matrix tests
+- Evidence: .github/workflows/release.yaml
+
+## 10 — Slice: Offline matrix tests — commit and push
+
+Session: unavailable · Timestamp: 2026-10-03T18:09:00+03:00
+
+- Action: User asked to commit dirty walkthrough updates and push
+- Result: Local commit + push to origin; stay on Slice: Offline matrix tests
+- Evidence: walkthrough narrative/log; PR #15
