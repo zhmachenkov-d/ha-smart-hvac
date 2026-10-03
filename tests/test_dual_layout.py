@@ -1,7 +1,8 @@
-"""Dual-layout / public-readiness packaging invariants."""
+"""Dual-layout / HACS packaging invariants."""
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -50,12 +51,38 @@ def test_history_has_no_live_apps_yaml_entity_ids():
     assert out.strip() == "", "filtered apps.yaml paths still present in history"
 
 
+def test_hacs_json_name():
+    data = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
+    assert data == {"name": "ha-smart-hvac"}
+
+
+def test_validate_workflow_hacs_appdaemon():
+    path = ROOT / ".github" / "workflows" / "validate.yaml"
+    text = path.read_text(encoding="utf-8")
+    assert "hacs/action" in text
+    assert "category: appdaemon" in text
+
+
 def test_readme_production_and_stranger_app_dir_examples():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "addon_configs/a0d7b954_appdaemon" in readme
     assert "app_dir: /config/apps" in readme
     assert "app_dir: /config/appdaemon/apps" in readme
     assert "hacs/integration#4442" in readme
-    assert "public-readiness" in readme
-    assert "hacs.json" in readme
     assert "appdaemon.readthedocs.io" in readme
+
+
+def test_readme_install_first_before_exclusive_session():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    install_markers = (
+        "Custom repositories",
+        "category **AppDaemon**",
+        "published GitHub Release",
+    )
+    for marker in install_markers:
+        assert marker in readme
+    install_idx = min(readme.index(m) for m in install_markers)
+    exclusive_idx = readme.index("Exclusive Session")
+    run_script_idx = readme.index("./scripts/run-appdaemon")
+    assert install_idx < exclusive_idx
+    assert install_idx < run_script_idx
