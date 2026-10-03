@@ -2,9 +2,26 @@
 
 [![CI](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml/badge.svg)](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml)
 
-AppDaemon Apps that control multi-zone OpenTherm HVAC through Home Assistant.
+AppDaemon apps for multi-zone OpenTherm HVAC control via Home Assistant.
 
-This repository uses a **dual layout** for public-readiness prep (not a finished HACS publish): canonical Python lives at repo-root `apps/hvac/`; Exclusive Session config stays under `appdaemon/` and points at that tree via `app_dir`. HACS knobs (`hacs.json`, HACS Action, release automation) are deferred.
+## Install with HACS (custom repository)
+
+This project ships as a **HACS AppDaemon** app (custom repository only — not in the HACS default store).
+
+1. In Home Assistant, open **HACS** → enable AppDaemon discovery if needed → **Custom repositories**.
+2. Add this repository URL, category **AppDaemon**, and install **ha-smart-hvac**.
+3. Install from a **published GitHub Release** (HACS prefers releases over the default branch alone).
+4. HACS downloads the package to the HA config tree under `appdaemon/apps/hvac/` (e.g. `/config/appdaemon/apps/hvac/` on many HAOS installs). If your AppDaemon add-on’s default apps directory is elsewhere (common after add-on v0.15+ under `addon_configs/…`), point `app_dir` at the HACS path so AppDaemon loads the download ([hacs/integration#4442](https://github.com/hacs/integration/issues/4442)):
+
+   ```yaml
+   appdaemon:
+     # HAOS / Supervised typical HA config mount; adjust if your install differs
+     app_dir: /config/appdaemon/apps
+   ```
+
+5. Create `apps.yaml` **beside** the downloaded `hvac/` under that `app_dir` (HACS only installs `apps/hvac/`, so `apps/apps.yaml.example` is **not** in the download). Copy the example from the GitHub repo and replace `YOUR_*` placeholders with your entity IDs (never commit live house IDs):
+
+   [apps/apps.yaml.example](https://raw.githubusercontent.com/zhmachenkov-d/ha-smart-hvac/main/apps/apps.yaml.example)
 
 ## Layout
 
@@ -15,12 +32,7 @@ This repository uses a **dual layout** for public-readiness prep (not a finished
 | `apps/apps.yaml.example` | Placeholder entity IDs only |
 | `appdaemon/` | Exclusive Session AppDaemon config (`appdaemon.yaml`, secrets) |
 
-Fresh clone without wiring:
-
-```bash
-cp apps/apps.yaml.example apps/apps.yaml
-# then replace YOUR_* placeholders with your house entity IDs
-```
+Canonical Python lives at repo-root `apps/hvac/`. Exclusive Session config stays under `appdaemon/` and loads that tree via `app_dir: ../apps` (no symlink).
 
 ## Dev Container (Exclusive Session)
 
@@ -33,7 +45,12 @@ cp apps/apps.yaml.example apps/apps.yaml
 2. Open the folder in a Dev Container (**Dev Containers: Reopen in Container**).
    Python 3.12 and dependencies install via `uv sync --group dev` in `postCreateCommand`.
 
-3. Ensure local wiring exists (`apps/apps.yaml` — see above).
+3. Ensure local wiring exists:
+
+   ```bash
+   cp apps/apps.yaml.example apps/apps.yaml
+   # then replace YOUR_* placeholders with your house entity IDs
+   ```
 
 4. **Exclusive Session:** stop or disable the Production AppDaemon add-on in Home Assistant.
 
@@ -80,28 +97,15 @@ appdaemon:
   app_dir: /config/apps
 ```
 
+### 3. Stranger HACS install
 
-### 3. Stranger HACS install (after a future public custom-repo publish)
-
-HACS downloads AppDaemon apps into the HA configuration directory under `appdaemon/apps/` (e.g. `/config/appdaemon/apps/hvac/` on many HAOS installs). After AppDaemon add-on v0.15+, the add-on’s **default** app directory often sits under `addon_configs/…` instead — HACS cannot write there ([hacs/integration#4442](https://github.com/hacs/integration/issues/4442)). If those paths differ, set the add-on’s `app_dir` to the HACS download path so AppDaemon loads the installed package:
+Same path as the Install section above: when the add-on default differs from the HACS download location, set:
 
 ```yaml
 appdaemon:
   # HAOS / Supervised typical HA config mount; adjust if your install differs
   app_dir: /config/appdaemon/apps
 ```
-
-Then add your own `apps.yaml` next to the downloaded `hvac/` package (placeholders from `apps/apps.yaml.example` in this repo). This layout prep does **not** yet ship `hacs.json` or claim HACS install works end-to-end.
-
-## Public-visibility flip (after history hygiene)
-
-Making the GitHub repository public is a **separate human action**. Do not flip visibility until:
-
-1. Layout changes are on the agreed branch.
-2. History rewrite has removed live house `apps.yaml` blobs from **every ref GitHub would serve** (`main`, other pushed branches, tags) — see the draft procedure in `_bmad-output/plan-hacs-packaging.md` (human must confirm the exact filter command and force-push target list before execution).
-3. Verification search for known former live entity IDs on those refs returns no hits on historical `apps.yaml` paths.
-
-Only then: GitHub → repository settings → change visibility to public (custom-repo HACS publish still needs deferred `hacs.json` / Action / releases work).
 
 ## Quality checks
 
