@@ -2,7 +2,7 @@
 
 Target: [PR #15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) · branch `ci/conventional-commits-gate` · commit `a1a5e05`
 
-**Current block:** Wrap-up (suggested)
+**Current block:** Wrap-up (PR #15 merged — `a49c4fe`)
 
 ## Blocks
 
@@ -63,4 +63,4 @@ Mechanism: one test per I/O matrix row + shape guards; CI-safe (no local tag dep
 
 ### Wrap-up
 
-All blocks accepted. Ship path is PR [#15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15). Before/at merge: create repo secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`). After merge+live verify: mark the PSR entry in [deferred-work.md](../deferred-work.md) done.
+All blocks accepted. PR [#15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) merged (`a49c4fe`). Still open: create repo secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`; `gh secret` returned 403); after live Release verify, mark the PSR entry in [deferred-work.md](../deferred-work.md) done.

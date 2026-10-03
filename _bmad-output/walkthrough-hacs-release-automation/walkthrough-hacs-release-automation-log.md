@@ -108,3 +108,20 @@ Session: unavailable · Timestamp: 2026-10-03T18:10:30+03:00
 - Result: Walkthrough finalized on branch; merge attempted; SEMANTIC_RELEASE_TOKEN left for human; deferred-work not closed pending live verify
 - Evidence: PR #15; walkthrough wrap-up section
 - Open: create SEMANTIC_RELEASE_TOKEN; live Release run; deferred-work PSR done mark
+
+## 14 — Wrap-up — PR merged
+
+Session: unavailable · Timestamp: 2026-10-03T18:13:30+03:00
+
+- Action: Merged PR #15 after updating branch with main; checks green
+- Result: MERGED mergeCommit a49c4fe; walkthrough wrap-up committed da51cb6 earlier
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15
+- Open: create SEMANTIC_RELEASE_TOKEN (gh secret 403); live Release verify; deferred-work PSR done mark
+
+## 15 — Wrap-up — commit post-merge dirt
+
+Session: unavailable · Timestamp: 2026-10-03T18:15:00+03:00
+
+- Action: User asked to commit dirty walkthrough merge notes
+- Result: Local commit on ci/conventional-commits-gate (post-merge; not yet on main)
+- Evidence: walkthrough narrative + log entry 14
