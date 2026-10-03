@@ -1,3 +1,4 @@
 {
-  "name": "ha-smart-hvac"
+  "name": "ha-smart-hvac",
+  "render_readme": true
 }

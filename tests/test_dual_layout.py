@@ -53,7 +53,7 @@ def test_history_has_no_live_apps_yaml_entity_ids():
 
 def test_hacs_json_name():
     data = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
-    assert data == {"name": "ha-smart-hvac"}
+    assert data == {"name": "ha-smart-hvac", "render_readme": True}
 
 
 def test_validate_workflow_hacs_appdaemon():
