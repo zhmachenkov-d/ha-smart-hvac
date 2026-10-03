@@ -57,10 +57,10 @@ Mechanism: one test per I/O matrix row + shape guards; CI-safe (no local tag dep
 ### Periphery
 
 - [`plan-hacs-release-automation.md`](../plan-hacs-release-automation.md) — build plan (`status: built`)
-- [`deferred-work.md`](../deferred-work.md) — PSR entry still open until merge+verify
+- [`deferred-work.md`](../deferred-work.md) — PSR entry marked done after live `v0.2.0` verify
 - [`README.md`](../../README.md) — install step 3 note (automated Releases after merge)
-- Human secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`) — create before/at merge
+- Repo secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`) — present; write-back authenticated on live Release
 
 ### Wrap-up
 
-All blocks accepted. PR [#15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) merged (`a49c4fe`). Still open: create repo secret `SEMANTIC_RELEASE_TOKEN` (bypass actor_id `22600261`; `gh secret` returned 403); after live Release verify, mark the PSR entry in [deferred-work.md](../deferred-work.md) done.
+All blocks accepted. PR [#15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) merged (`a49c4fe`). Live verify: PR [#17](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/17) → Release `v0.2.0` + write-back no-op. PSR entry in [deferred-work.md](../deferred-work.md) marked done; plan status `done`.

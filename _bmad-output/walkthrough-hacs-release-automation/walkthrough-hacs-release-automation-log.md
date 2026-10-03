@@ -125,3 +125,12 @@ Session: unavailable · Timestamp: 2026-10-03T18:15:00+03:00
 - Action: User asked to commit dirty walkthrough merge notes
 - Result: Local commit on ci/conventional-commits-gate (post-merge; not yet on main)
 - Evidence: walkthrough narrative + log entry 14
+
+## 16 — Live verify + deferred closeout
+
+Session: unavailable · Timestamp: 2026-10-03T18:48:00+03:00
+
+- Action: User asked to run live release, then close PSR deferred entry
+- Result: PR #17 merged → Release `v0.2.0` + write-back no-op; deferred-work PSR entry + plan PAT/deferred tasks marked done
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/17 ; `gh release view v0.2.0`; Release runs 37134501441 / 37134511966
+- Open: none for this train (CC-gate open-PR rebase note remains a separate deferred entry)
