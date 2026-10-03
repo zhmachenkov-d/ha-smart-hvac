@@ -1,6 +1,6 @@
 [project]
 name = "ha-smart-hvac"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT"
 requires-python = ">=3.12,<3.13"
 dependencies = ["appdaemon==4.5.13"]
