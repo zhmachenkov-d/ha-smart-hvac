@@ -26,3 +26,20 @@ Session: unavailable · Timestamp: 2026-10-03T10:46:30+03:00
 - Action: User accepted Intent block.
 - Result: Intent done; advance to Broad strokes.
 - Evidence: walkthrough-hacs-publish.md
+
+## 4 — Broad strokes — commit dirty tree
+
+Session: unavailable · Timestamp: 2026-10-03T10:47:30+03:00
+
+- Action: User said yes to commit; committed walkthrough folder + party memlog; left _bmad/custom/config.toml untracked.
+- Result: docs commit pushed to feat/hacs-publish (parent will fill hash if known).
+- Evidence: _bmad-output/walkthrough-hacs-publish/; party-mode memlog
+- Open: still on Broad strokes
+
+## 5 — Broad strokes — done
+
+Session: unavailable · Timestamp: 2026-10-03T10:48:00+03:00
+
+- Action: User accepted Broad strokes.
+- Result: Advance to Slice: HACS manifest + Validate; slice body filled.
+- Evidence: hacs.json; validate.yaml

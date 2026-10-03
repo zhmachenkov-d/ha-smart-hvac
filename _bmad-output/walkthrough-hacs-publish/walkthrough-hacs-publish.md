@@ -2,13 +2,13 @@
 
 Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · branch `feat/hacs-publish`
 
-**Current block:** Broad strokes
+**Current block:** Slice: HACS manifest + Validate
 
 ## Blocks
 
 - [x] **Intent** — done
-- [ ] **Broad strokes** — in progress (current)
-- [ ] **Slice: HACS manifest + Validate** — unvisited
+- [x] **Broad strokes** — done
+- [ ] **Slice: HACS manifest + Validate** — in progress (current)
 - [ ] **Slice: install-first README** — unvisited
 - [ ] **Slice: version + packaging tests** — unvisited
 - [ ] **Periphery** — unvisited
@@ -38,7 +38,10 @@ HACS custom-repo publish knobs: minimal manifest, CI validation, stranger instal
 
 ### Slice: HACS manifest + Validate
 
-*(filled when visited)*
+HACS needs a root name manifest and a Validate workflow that runs the same checks HACS uses. This PR adds both without folding them into the lint/test CI job.
+
+- [`hacs.json`](../../hacs.json) — exactly `{"name": "ha-smart-hvac"}`.
+- [`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml) — `actions/checkout@v4` then `hacs/action@main` with `category: appdaemon`; triggers push/PR/schedule/`workflow_dispatch`; no `ignore` flags.
 
 ### Slice: install-first README
 
