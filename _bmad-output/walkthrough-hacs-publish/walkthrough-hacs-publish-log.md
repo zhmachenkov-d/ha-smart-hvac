@@ -94,3 +94,12 @@ Session: unavailable · Timestamp: 2026-10-03T10:53:30+03:00
 - Action: User accepted Periphery block.
 - Result: All walkthrough blocks done; suggest Wrap-up (merge PR #11 then Phase B).
 - Evidence: plan-hacs-publish.md; uv.lock; party memlog
+
+## 12 — Wrap-up — proposed
+
+Session: unavailable · Timestamp: 2026-10-03T10:54:30+03:00
+
+- Action: User chose Wrap-up.
+- Result: open — proposed merge PR #11 then Phase B; waiting for user confirmation before acting.
+- Evidence: plan-hacs-publish.md Phase A/B; PR #11
+- Open: user confirmation

@@ -2,7 +2,7 @@
 
 Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · branch `feat/hacs-publish`
 
-**Current block:** (none — all blocks done; awaiting Wrap-up)
+**Current block:** Wrap-up (proposed; awaiting confirmation)
 
 ## Blocks
 
