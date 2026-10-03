@@ -2,13 +2,13 @@
 
 Target: [PR #15](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/15) · branch `ci/conventional-commits-gate` · commit `a1a5e05`
 
-**Current block:** Broad strokes (in progress)
+**Current block:** Slice: PSR config (in progress)
 
 ## Blocks
 
 - [x] **Intent** — done
-- [ ] **Broad strokes** — in progress
-- [ ] **Slice: PSR config**
+- [x] **Broad strokes** — done
+- [ ] **Slice: PSR config** — in progress
 - [ ] **Slice: Release workflow + auth**
 - [ ] **Slice: Offline matrix tests**
 - [ ] **Periphery**
