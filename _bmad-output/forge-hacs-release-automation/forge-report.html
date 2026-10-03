@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forge Report — Automate HACS releases</title>
+  <style>
+    :root {
+      --ink: #1a1410;
+      --paper: #f3ebe0;
+      --rule: #c4b5a0;
+      --accent: #8b1e1e;
+      --seal: #1e4d3a;
+      --seal-deep: #143328;
+      --muted: #5c5348;
+      --card: #fffaf3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background:
+        radial-gradient(ellipse at 20% 0%, #fff8ee 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 10%, #d8e8dc 0%, transparent 40%),
+        var(--paper);
+      color: var(--ink);
+      line-height: 1.45;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.35rem;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .seal {
+      width: 7.5rem;
+      height: 7.5rem;
+      flex-shrink: 0;
+    }
+    .seal text {
+      fill: #e8f5ee;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.35rem;
+      margin: 1.75rem 0 0.75rem;
+    }
+    ul {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+    li { margin: 0.35rem 0; }
+    .rejected li::marker { color: var(--accent); }
+    .voices {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+    .voice {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      padding: 0.65rem 0.85rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: start;
+    }
+    .icon {
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+    .voice strong { display: block; font-size: 0.95rem; }
+    .voice span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: ui-monospace, "Cascadia Code", Menlo, monospace;
+      font-size: 0.88em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Automate HACS releases</h1>
+        <p class="meta">ha-smart-hvac · loose forge · 2026-10-03 · outcome HARDENED</p>
+        <p class="meta">Workspace: <code>_bmad-output/forge-hacs-release-automation/</code></p>
+      </div>
+      <svg class="seal" viewBox="0 0 120 120" aria-label="HARDENED seal" role="img">
+        <defs>
+          <radialGradient id="wax" cx="40%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#2f6b4f"/>
+            <stop offset="55%" stop-color="var(--seal)"/>
+            <stop offset="100%" stop-color="var(--seal-deep)"/>
+          </radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="56" fill="url(#wax)" stroke="#0d2418" stroke-width="2"/>
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#c8e6d4" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.7"/>
+        <text x="60" y="58" text-anchor="middle" font-size="11">HARDENED</text>
+        <text x="60" y="74" text-anchor="middle" font-size="8" opacity="0.9">FORGE SEAL</text>
+      </svg>
+    </header>
+
+    <h2>Outcome</h2>
+    <p>
+      Идея усилена до решения: автоматический release train на
+      <strong>python-semantic-release</strong> после merge в <code>main</code>,
+      с write-back версии/changelog, tag <code>v*</code>, GitHub Release без assets,
+      и CI-gate на Conventional Commits (title + commits). Потолок HACS — custom repository.
+    </p>
+
+    <h2>Locked</h2>
+    <ul>
+      <li>PSR на <code>main</code>: bump + <code>CHANGELOG.md</code> write-back + tag <code>v{version}</code> + GitHub Release.</li>
+      <li>Бамп по стандарту Conventional Commits / PSR defaults.</li>
+      <li>Auth: отдельный token в secrets (есть ruleset <code>branch-protection</code>).</li>
+      <li>CI-gate: PR title <em>и</em> commits.</li>
+      <li>Источник версии: <code>pyproject.toml</code>; baseline <code>v0.1.0</code>.</li>
+      <li>HACS: published Release обязателен; binary assets не нужны.</li>
+    </ul>
+
+    <h2>Rejected</h2>
+    <ul class="rejected">
+      <li>release-please (Release PR).</li>
+      <li>JS semantic-release / второй калькулятор версии (commitizen и т.п.).</li>
+      <li>«Только версия/чеклист» без Release CI.</li>
+      <li>Редкий ручной сигнал релиза сверх Conventional Commits.</li>
+      <li>Binary release assets.</li>
+      <li>Never из <code>plan-hacs-publish</code> (нет tag→Release CI; только agent <code>gh release create</code>) — снят для будущих релизов.</li>
+    </ul>
+
+    <h2>Weak points that survived</h2>
+    <ul>
+      <li>Bot push на <code>main</code> — исключение из human PRs-only; зависит от корректного token + ruleset.</li>
+      <li>Без зелёного CC-gate «кривой» merge даёт тихий no-op или неверный bump — gate обязателен, но инструмент gate ещё не выбран в forge.</li>
+      <li>CI сегодня только на <code>pull_request</code>; release workflow на <code>main</code> — новая поверхность, которую нужно добавить отдельно от lint/test.</li>
+    </ul>
+
+    <h2>Personas</h2>
+    <div class="voices">
+      <div class="voice"><div class="icon">📋</div><div><strong>John</strong> <span>PM — зачем автоматизировать и что видит HACS-пользователь</span></div></div>
+      <div class="voice"><div class="icon">🏗️</div><div><strong>Winston</strong> <span>Architect — release-please vs semantic-release; write-back</span></div></div>
+      <div class="voice"><div class="icon">💻</div><div><strong>Amelia</strong> <span>Dev — PSR vs Node; CHANGELOG; точность пайплайна</span></div></div>
+      <div class="voice"><div class="icon">🎯</div><div><strong>Yui</strong> <span>Craftsman — один источник версии; один vs два gate</span></div></div>
+      <div class="voice"><div class="icon">🚢</div><div><strong>Dana</strong> <span>Pragmatist — HACS нужен Release, не золочение</span></div></div>
+      <div class="voice"><div class="icon">🔒</div><div><strong>Vex</strong> <span>Security — token vs GITHUB_TOKEN на protected main</span></div></div>
+      <div class="voice"><div class="icon">🌶️</div><div><strong>Boundary</strong> <span>Edge — merge vs squash; что ломает PSR</span></div></div>
+      <div class="voice"><div class="icon">📏</div><div><strong>Level</strong> <span>Claim checker — skill ≠ enforcement</span></div></div>
+      <div class="voice"><div class="icon">🛑</div><div><strong>Killjoy</strong> <span>Loop stopper — дефолт PSR vs «редкий релиз»</span></div></div>
+      <div class="voice"><div class="icon">🪵</div><div><strong>Splinter</strong> <span>Consensus challenger — нужны ли assets</span></div></div>
+      <div class="voice"><div class="icon">🛠️</div><div><strong>Cass</strong> <span>Generated release engineer — модели A/B/C и HACS assets</span></div></div>
+    </div>
+
+    <footer>
+      Distilled from <code>.memlog.md</code> → <code>forge-hacs-release-automation.md</code>.
+      Hand off to <code>bmad-spec</code> / <code>bmad-build</code> when ready to implement.
+    </footer>
+  </main>
+</body>
+</html>
