@@ -2,16 +2,16 @@
 
 Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · branch `feat/hacs-publish`
 
-**Current block:** Slice: install-first README
+**Current block:** Periphery
 
 ## Blocks
 
 - [x] **Intent** — done
 - [x] **Broad strokes** — done
 - [x] **Slice: HACS manifest + Validate** — done
-- [ ] **Slice: install-first README** — in progress (current)
-- [ ] **Slice: version + packaging tests** — unvisited
-- [ ] **Periphery** — unvisited
+- [x] **Slice: install-first README** — done
+- [x] **Slice: version + packaging tests** — done
+- [ ] **Periphery** — in progress (current)
 
 ### Intent
 
@@ -57,8 +57,14 @@ Stranger path opens the README before dual-layout/dev material. HACS download on
 
 ### Slice: version + packaging tests
 
-*(filled when visited)*
+Version bump aligns metadata with the planned first release tag; packaging tests lock HACS knobs and install-first docs.
+
+- [`pyproject.toml`](../../pyproject.toml) — `version = "0.1.0"` (uv.lock synced).
+- [`tests/test_dual_layout.py`](../../tests/test_dual_layout.py) — `test_hacs_json_name`, `test_validate_workflow_hacs_appdaemon`, `test_readme_install_first_before_exclusive_session`; dropped `public-readiness` assert.
 
 ### Periphery
 
-*(filled when visited)*
+- [plan-hacs-publish.md](../plan-hacs-publish.md) — Phase A/B plan artifact (status built).
+- [uv.lock](../../uv.lock) — lockfile synced with pyproject version 0.1.0.
+- [party-mode memlog](../party-mode/memories/installed/.memlog.md) — party greenlight note for install-first README.
+- This narrative and [walkthrough-hacs-publish-log.md](./walkthrough-hacs-publish-log.md) track Phase A acceptance for PR #11.

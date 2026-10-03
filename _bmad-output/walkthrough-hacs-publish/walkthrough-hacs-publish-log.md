@@ -61,3 +61,28 @@ Session: unavailable · Timestamp: 2026-10-03T10:49:00+03:00
 - Result: Advance to install-first README; Validate gap open (license + Phase B metadata).
 - Evidence: gh Validate runs; hacs.json; validate.yaml
 - Open: license not in plan; description/topics Phase B
+
+## 8 — Slice install-first README — commit
+
+Session: unavailable · Timestamp: 2026-10-03T10:49:30+03:00
+
+- Action: User said yes to commit dirty walkthrough narrative/log.
+- Result: docs commit pushed.
+- Evidence: walkthrough-hacs-publish.md README slice
+- Open: still on install-first README
+
+## 9 — Slice install-first README — done
+
+Session: unavailable · Timestamp: 2026-10-03T10:50:00+03:00
+
+- Action: User accepted install-first README slice.
+- Result: Advance to version + packaging tests.
+- Evidence: README.md Install section; test_readme_install_first
+
+## 10 — Slice: version + packaging tests — done
+
+Session: unavailable · Timestamp: 2026-10-03T10:51:30+03:00
+
+- Action: User accepted version + packaging tests slice.
+- Result: Advance to Periphery; version 0.1.0 + packaging asserts accepted.
+- Evidence: pyproject.toml; tests/test_dual_layout.py; uv.lock
