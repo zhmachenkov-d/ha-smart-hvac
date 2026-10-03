@@ -2,7 +2,7 @@
 
 Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · branch `feat/hacs-publish`
 
-**Current block:** Periphery
+**Current block:** (none — all blocks done; awaiting Wrap-up)
 
 ## Blocks
 
@@ -11,7 +11,7 @@ Target: [PR #11](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/11) · bran
 - [x] **Slice: HACS manifest + Validate** — done
 - [x] **Slice: install-first README** — done
 - [x] **Slice: version + packaging tests** — done
-- [ ] **Periphery** — in progress (current)
+- [x] **Periphery** — done
 
 ### Intent
 

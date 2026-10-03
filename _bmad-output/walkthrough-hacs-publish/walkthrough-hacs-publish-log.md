@@ -86,3 +86,11 @@ Session: unavailable · Timestamp: 2026-10-03T10:51:30+03:00
 - Action: User accepted version + packaging tests slice.
 - Result: Advance to Periphery; version 0.1.0 + packaging asserts accepted.
 - Evidence: pyproject.toml; tests/test_dual_layout.py; uv.lock
+
+## 11 — Periphery — done
+
+Session: unavailable · Timestamp: 2026-10-03T10:53:30+03:00
+
+- Action: User accepted Periphery block.
+- Result: All walkthrough blocks done; suggest Wrap-up (merge PR #11 then Phase B).
+- Evidence: plan-hacs-publish.md; uv.lock; party memlog
