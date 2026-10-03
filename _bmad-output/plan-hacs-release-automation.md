@@ -3,7 +3,7 @@ title: 'HACS release train (python-semantic-release)'
 type: 'feature'
 ticket: ''
 created: '2026-10-03'
-status: 'built'
+status: 'done'
 baseline_revision: 'deee8a22e2b33be03cd283711f1e2a890ee01f4e'
 route: 'full'
 route_source: 'auto'
@@ -79,8 +79,8 @@ context:
 - [x] `.github/workflows/release.yaml` -- `push` to `main` (+ optional `workflow_dispatch`); concurrency `cancel-in-progress: false`; checkout with PAT token + full history + `git reset --hard ${{ github.sha }}`; setup-uv 3.12; `GH_TOKEN` from `secrets.SEMANTIC_RELEASE_TOKEN`; run PSR; no asset upload -- release train
 - [x] `tests/test_release_workflow.py` -- lock workflow shape (trigger, checkout token, `GH_TOKEN`, PSR invocation, no assets) and assert `build_command` contains no `uv build` -- prove shape without live Actions
 - [x] `README.md` -- brief note that releases after `v0.1.0` are automated on merge to `main`, without disturbing install-first HACS lead -- operators know Releases keep coming
-- [ ] Repo secret + PAT (human) -- create `SEMANTIC_RELEASE_TOKEN` owned by bypass user `actor_id` `22600261` (ruleset `24390720`); fine-grained: Contents Read/Write, Metadata Read (plus whatever PSR needs for Releases); classic: `repo` scope; verify workflow can authenticate -- make write-back enforceable
-- [ ] `_bmad-output/deferred-work.md` -- mark the PSR deferred entry done when the train is merged and verified -- close the split from the CC gate plan
+- [x] Repo secret + PAT (human) -- create `SEMANTIC_RELEASE_TOKEN` owned by bypass user `actor_id` `22600261` (ruleset `24390720`); fine-grained: Contents Read/Write, Metadata Read (plus whatever PSR needs for Releases); classic: `repo` scope; verify workflow can authenticate -- make write-back enforceable
+- [x] `_bmad-output/deferred-work.md` -- mark the PSR deferred entry done when the train is merged and verified -- close the split from the CC gate plan
 
 **Acceptance Criteria:**
 - Given `main` receives a merge whose commits since the last release include a `feat` or `fix` (or breaking), when the release workflow finishes successfully, then `pyproject.toml` / `CHANGELOG.md` / `uv.lock` are updated on `main`, a `v*` tag exists, and `gh release view` shows a published Release with no binary assets.
@@ -93,6 +93,7 @@ context:
 
 - 2026-10-03 agent: Added `python-semantic-release` (dev group), `[tool.semantic_release]` (version_toml, `v{version}`, changelog defaults, non-releasing `chore(release)` commit_message, uv.lock-only `build_command`, `upload_to_vcs_release = false`), `.github/workflows/release.yaml` (push→main + workflow_dispatch dry-run/`--noop`, PAT checkout + `GH_TOKEN`, `git checkout -B ${{ github.ref_name }}` then `git reset --hard`, cancel-in-progress false), `tests/test_release_workflow.py`, README one-liner after install step 3. Left human PAT/`SEMANTIC_RELEASE_TOKEN` and deferred-work “done” mark for after merge/verify. Invokes `semantic-release version` (creates VCS Release); not `publish` (asset upload path). Offline verify: pytest release/CC/dual-layout + ruff clean.
 - 2026-10-03 agent: Extended `tests/test_release_workflow.py` with one offline test per frozen I/O matrix row (releasing / non-releasing / PAT re-trigger / missing secret / already-released tip). No live Actions/secrets; already-released tip asserts tag↔version via `--print-last-released*` plus `version` invocation as the no-op path.
+- 2026-10-03 agent: Live verify after PR #17 merge — Release published `v0.2.0` (pyproject/CHANGELOG/uv.lock write-back, no assets); PAT write-back re-trigger exited 0 with no second bump. Marked PAT + deferred-work tasks done; plan status → `done`.
 
 ## Plan Change Log
 
