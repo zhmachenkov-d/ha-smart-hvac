@@ -3,7 +3,7 @@ title: 'Conventional Commits PR gate (title + commits)'
 type: 'feature'
 ticket: ''
 created: '2026-10-03'
-status: 'built'
+status: 'done'
 baseline_revision: '96becceadee7a6b3d30858d2eebdfe1d73a82d68'
 route: 'full'
 route_source: 'auto'
@@ -92,6 +92,7 @@ context:
 - Verified: `uv run pytest tests/test_conventional_commits.py tests/test_dual_layout.py` (35 passed); `uv run ruff check apps tests` + `ruff format --check apps tests` clean; CLI smoke `--title` good/bad exit codes.
 - **Ruleset:** human added required status checks `pr-title` and `pr-commits` on `branch-protection` (id `24390720`); verified via `gh api` (`required_status_checks` present, `strict_required_status_checks_policy: true`).
 - 2026-10-03 review patch: `CC_RANGE` switched to two-dot `base.sha..head.sha`; tests cover behind-main three-dot fail / two-dot pass + workflow YAML `..` lock.
+- 2026-10-03: Migration deferred entry closed — workflow on `main` (PR #14), zero open PRs stuck on missing checks; plan status → `done`. PSR train deferred from this plan also closed (live `v0.2.0`).
 
 ## Plan Change Log
 

@@ -58,11 +58,11 @@ Pytest covers the checker without GitHub Actions: valid/invalid subjects, merge-
 
 ### Periphery
 
-- [`_bmad-output/plan-conventional-commits-gate.md`](../plan-conventional-commits-gate.md) — build plan (`status: built`)
-- [`_bmad-output/deferred-work.md`](../deferred-work.md) — PSR release train + migration note for other open PRs
+- [`_bmad-output/plan-conventional-commits-gate.md`](../plan-conventional-commits-gate.md) — build plan (`status: done`)
+- [`_bmad-output/deferred-work.md`](../deferred-work.md) — PSR train + open-PR migration note both done
 - [`.cursor/skills/git-workflow/SKILL.md`](../../.cursor/skills/git-workflow/SKILL.md) — CI enforcement note (agents)
 - This walkthrough folder — review narrative + log for PR #14
 
 ### Wrap-up
 
-All blocks accepted. PR [#14](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/14) is the ship path; walkthrough files are still untracked on the feature branch.
+All blocks accepted. PR [#14](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/14) merged; required checks `pr-title`/`pr-commits` live on `main`. Migration deferred entry closed (no stuck open PRs). PSR train deferred from this plan closed separately after live `v0.2.0`.
