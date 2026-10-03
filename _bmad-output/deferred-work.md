@@ -13,4 +13,5 @@
 - source_plan: `/workspaces/ha-smart-hvac/_bmad-output/plan-conventional-commits-gate.md`
   summary: After merging the Conventional Commits workflow, expect unrelated open PRs without that workflow file to stay pending on required checks `pr-title`/`pr-commits` until they rebase onto `main` (or the workflow lands).
   evidence: Ruleset required checks were enabled before the workflow existed on `main`; same-repo PR that introduces the workflow still runs it from the head ref, but other branches without the file cannot emit those check names.
+  status: done (2026-10-03) — Migration window closed: workflow on `main` via PR #14; no open PRs left pending on missing `pr-title`/`pr-commits`. New PRs from `main` emit both checks.
 

@@ -74,3 +74,12 @@ Session: unavailable · Timestamp: 2026-10-03T17:17:00+03:00
 - Evidence: PR #14; untracked `_bmad-output/walkthrough-conventional-commits-gate/`
 - Open: Human confirm next action
 
+## 9 — Migration deferred closeout
+
+Session: unavailable · Timestamp: 2026-10-03T18:51:00+03:00
+
+- Action: User asked to finish remaining deferred work after PSR closeout
+- Result: Open-PR migration note marked done (workflow on main, zero stuck PRs); CC plan status → `done`
+- Evidence: `_bmad-output/deferred-work.md`; `gh pr list` empty
+- Open: none
+
