@@ -50,3 +50,19 @@ Session: unavailable · Timestamp: 2026-10-03T18:07:00+03:00
 - Action: User asked to commit dirty walkthrough status updates
 - Result: Local commit of Broad strokes accepted + PSR config current; stay on Slice: PSR config
 - Evidence: walkthrough-hacs-release-automation.md + log
+
+## 7 — Slice: PSR config — accepted
+
+Session: unavailable · Timestamp: 2026-10-03T18:07:30+03:00
+
+- Action: User said Slice: PSR config done
+- Result: PSR config accepted; advancing to Slice: Release workflow + auth
+- Evidence: pyproject.toml [tool.semantic_release]
+
+## 8 — Slice: Release workflow + auth — commit and push
+
+Session: unavailable · Timestamp: 2026-10-03T18:08:00+03:00
+
+- Action: User asked to commit dirty walkthrough updates and push
+- Result: Local commit + push to origin; stay on Slice: Release workflow + auth
+- Evidence: walkthrough narrative/log; PR #15
