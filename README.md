@@ -10,7 +10,7 @@ This project ships as a **HACS AppDaemon** app (custom repository only — not i
 
 1. In Home Assistant, open **HACS** → enable AppDaemon discovery if needed → **Custom repositories**.
 2. Add this repository URL, category **AppDaemon**, and install **ha-smart-hvac**.
-3. Install from a **published GitHub Release** (HACS prefers releases over the default branch alone).
+3. Install from a **published GitHub Release** (HACS prefers releases over the default branch alone). After `v0.1.0`, Releases are cut automatically by CI when releasing changes merge to `main`.
 4. HACS downloads the package to the HA config tree under `appdaemon/apps/hvac/` (e.g. `/config/appdaemon/apps/hvac/` on many HAOS installs). If your AppDaemon add-on’s default apps directory is elsewhere (common after add-on v0.15+ under `addon_configs/…`), point `app_dir` at the HACS path so AppDaemon loads the download ([hacs/integration#4442](https://github.com/hacs/integration/issues/4442)):
 
    ```yaml
