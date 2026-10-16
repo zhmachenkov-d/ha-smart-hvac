@@ -1,0 +1,29 @@
+# Epic breakdown — table order is build order.
+
+[[entry]]
+id = 1
+type = "story"
+title = "Retune plant-channel defaults and lock with tests"
+description = "Update example b0/omega_o for absolute SWT at dt=60; add |u_track| magnitude threshold field on LadrcConfig / apps.yaml.example (default 100); amend ADR 0002 with Huang/dt=60/absolute-SWT warning and house-calibration note (ADR 0003 stays ωc-only); add tests that reproduce divergence under old/large gains and assert new-default multi-tick boundedness."
+verify = "uv run pytest: old/large gains diverge over multiple advances; new defaults keep u_track/z finite with |u_track| in tens of °C over N ticks with y≈21 and u in [40,55]. ADR 0002 carries Huang/dt=60/absolute-SWT + house-calibration; ADR 0003 unchanged ωc-only."
+covers = ["CAP-1", "CAP-3", "CAP-4"]
+after = []
+hitl = false
+risk = "medium"
+plan_checkpoint = true
+done_checkpoint = true
+notes = ["CAP-3 part: divergence + boundedness only; guard coverage is entry 2. Threshold config field is the handoff Entry 2 consumes."]
+
+[[entry]]
+id = 2
+type = "story"
+title = "Blow-up guard in hvac_app"
+description = "In hvac_app after compute_tracking, if u_track is non-finite or |u_track| exceeds the config magnitude threshold from entry 1: reset ESO, command=clamp(u_ff), WARNING once per episode; optionally refuse advance with non-finite state. No guard API in LadrcState. Add guard regression tests on a pure testable seam (no full AppDaemon)."
+verify = "Poisoned z2 or exploded u_track yields feedforward-only command, ESO reset, and WARNING path; uv run pytest covers the guard."
+covers = ["CAP-2", "CAP-3"]
+after = [1]
+hitl = false
+risk = "medium"
+plan_checkpoint = true
+done_checkpoint = true
+notes = ["CAP-3 part: guard path only. Consumes threshold field added in entry 1."]
