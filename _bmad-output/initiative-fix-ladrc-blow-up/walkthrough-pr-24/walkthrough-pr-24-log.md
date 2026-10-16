@@ -208,3 +208,12 @@ Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:39:30+
 - Result: starting commit+push of closed narrative; CI was green on e4567ab/2734472
 - Evidence: user 1-4; gh pr checks 24 all pass prior to this commit
 - Open: merge then docs close for story done (pattern PR #23)
+
+## 23 — Wrap-up — merge + story done
+
+Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:42:00+03:00
+
+- Action: Merged PR #24 after green CI; marked story 1.2 done via tickets.py; board next = 1.3
+- Result: PR #24 MERGED (`57f57c6`); story Tracking-residue known input → status `done`; 1.3 ready_to_start
+- Evidence: gh pr merge 24; tickets.py mark 1.2 done; tickets.py next
+- Open: none for wrap-up

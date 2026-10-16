@@ -3,7 +3,7 @@ title: 'Tracking-residue known input in hvac_app'
 type: 'bugfix'
 ticket: '2'
 created: '2026-10-16'
-status: 'built'
+status: done
 baseline_revision: '42dfd834e5423caf083ec35f51c559ae7d4302df'
 route: 'oneshot'
 route_source: 'auto'

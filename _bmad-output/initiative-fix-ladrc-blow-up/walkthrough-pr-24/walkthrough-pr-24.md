@@ -2,7 +2,7 @@
 
 Target: [PR #24](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/24) (`fix/1-2-tracking-residue-known-input` → `main`)
 Focus: risks, boundaries, merge-readiness
-Current block: closed — all blocks done; Wrap-up in progress (merge + story done)
+Current block: closed — PR #24 merged; story 1.2 marked `done`
 
 ## Blocks
 
