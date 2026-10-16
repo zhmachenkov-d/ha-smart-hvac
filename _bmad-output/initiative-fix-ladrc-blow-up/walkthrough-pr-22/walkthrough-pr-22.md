@@ -2,7 +2,7 @@
 
 Target: [PR #22](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/22) (`fix/1-1-continuous-form-eso` → `main`)
 Focus: risks, boundaries, merge-readiness
-Current block: **Periphery** (in progress)
+Current block: all blocks done — **Wrap-up** suggested
 
 ## Blocks
 
@@ -10,7 +10,7 @@ Current block: **Periphery** (in progress)
 - [x] **Broad strokes** — done
 - [x] **Continuous-form advance** — done
 - [x] **CAP-5 lock tests** — done
-- [ ] **Periphery** — in progress
+- [x] **Periphery** — done
 
 ## Intent
 

@@ -154,3 +154,21 @@ Session: unavailable · Timestamp: 2026-10-16T15:53:00+03:00
 - Result: 9e47a76 docs: add PR #22 walkthrough for continuous-form ESO; pushed to origin/fix/1-1-continuous-form-eso
 - Evidence: walkthrough-pr-22.md; walkthrough-pr-22-log.md; PR #22
 - Open: Periphery block still awaiting done / Wrap-up; .memlog still dirty
+
+## 18 — Periphery — done; Wrap-up suggested
+
+Session: unavailable · Timestamp: 2026-10-16T15:56:00+03:00
+
+- Action: User marked Periphery done; all walkthrough blocks complete
+- Result: Review complete pending Wrap-up; suggested follow-through = merge PR #22 as CAP-5 tracer
+- Evidence: walkthrough-pr-22.md all boxes checked
+- Open: Await Wrap-up / merge confirmation; narrative+log status update may need commit
+
+## 19 — Wrap-up — review finished
+
+Session: unavailable · Timestamp: 2026-10-16T15:57:00+03:00
+
+- Action: User chose commit+push + Wrap-up; all blocks done
+- Result: Review closed; follow-through proposed = merge PR #22 as CAP-5 tracer (await explicit merge OK)
+- Evidence: walkthrough-pr-22.md; PR #22
+- Open: Merge not executed until user confirms
