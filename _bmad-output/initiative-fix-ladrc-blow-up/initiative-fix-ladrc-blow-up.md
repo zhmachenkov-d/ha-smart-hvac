@@ -10,7 +10,7 @@ assignee: ""
 risk: high
 estimate: ""
 estimate_basis: ""
-status: in-progress
+status: done
 ---
 
 # Stop LADRC SWT bang-bang from ESO blow-up
@@ -48,3 +48,4 @@ Capability boundary: LADRC plant channel for OpenTherm Set Water Temperature in 
 - Decision: one epic for all CAP-1–CAP-5; no platform-baseline epic — brownfield fix on existing app (2026-10-16).
 - Decision: user asked to proceed for build-auto/loop after store setup (2026-10-16).
 - Decision: 2026-10-16 re-slice after party+spikes — CAP-5 continuous-form ESO is primary; epic tickets.toml replaced (2026-10-16).
+- Decision: 2026-10-17 closed initiative after epic-fix-ladrc-blow-up Done when #1–#4 met and AI-1…AI-8 shipped (same single epic).

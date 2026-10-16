@@ -1,7 +1,7 @@
 ---
 epic: epic-fix-ladrc-blow-up
 date: 2026-10-16T20:00:36+00:00
-verdict: accepted-with-open-items
+verdict: accepted
 criteria: declared
 headless: false
 ---
@@ -12,7 +12,7 @@ headless: false
 
 **Epic:** `epic-fix-ladrc-blow-up` — Fix LADRC u_track blow-up  
 **Initiative:** `initiative-fix-ladrc-blow-up`  
-**Board epic status:** still `in-progress` (tickets all done; epic close is out of scope for this retro)  
+**Board epic status:** `done` (closed AI-8, 2026-10-17; was `in-progress` at retro time)  
 **Going-in concerns:** none (user: без приоритетов)  
 **Pending / built-only tickets:** none — all five `status: done` / `state: done`
 
@@ -177,24 +177,24 @@ Proposed only — not applied by this retro. Owners are suggestions.
 | AI-5 | **Done (2026-10-17):** `commit_omega_c` gated by `not guard.tripped`; inspect lock in `test_hvac_app.py` | — | F-R2 |
 | AI-6 | **Done (2026-10-17):** reset-after-success — `guard_u_track` no longer mutates ESO; `control_tick` resets after successful write then advances; seam + inspect locks | — | F-R4 |
 | AI-7 | **Done (2026-10-17):** out-of-band `u_ff` trip clamp test; `should_warn`/`latch_out` inspect lock; deleted tautological CAP-5 helper test; `u_track_max` finite-positive parse validation | — | F-V2–V4, F-R6 |
-| AI-8 | Close epic via `bmad-ticket` after human accepts verdict (board still `in-progress`) | Human | workflow |
+| AI-8 | **Done (2026-10-17):** epic `status: done`; closure against Done when #1–#4 + all stories done; retro verdict → `accepted` | — | workflow |
 
 **Process lessons (no code change):** keep entry `verify` in sync when plan Intent moves; joint-test gain×threshold across ticket boundaries; when deferring a Done when half, amend Done when in the same change.
 
 ## Acceptance verdict
 
-**Machine verdict: `accepted-with-open-items`**  
+**Machine verdict at retro: `accepted-with-open-items` → human closed epic AI-8 (2026-10-17): `accepted`**  
 **Criteria: declared** (epic Done when)  
-**Unfinished tickets:** none → completeness gate does not force `rejected`.
+**Unfinished tickets:** none. Open items AI-1…AI-7 all done before close.
 
 | Done when | Evidence | Met? |
 |-----------|----------|------|
-| 1. Continuous-form + thermal/example path keeps `|u_track|` in tens over multi-tick `y≈21` | `test_cap5_continuous_thermal_c_bounded`, `test_cap3b_example_aligned_continuous_c_bounded`; C known-input in app | **Yes for locked scenario**; open AI-1 for realistic `|e|≥1` under example `ωc` |
-| 2. Poisoned/exploded `u_track` → FF-only + reset + WARNING; recover without zone/idle/plant-off | Guard seam tests + warn-once latch; advance-after-reset per plan | **Yes** (unit); live WARNING path not runtime-checked |
-| 3. Suite fails old path / passes fixed | exp_map thermal+C diverge + Huang+absolute diverge + continuous bounded + guard tests green | **Yes** (AI-3 shipped 2026-10-17) |
+| 1. Continuous-form + thermal/example path keeps `|u_track|` in tens over multi-tick `y≈21` | CAP-5/CAP-3(b) bounded tests + package A cold-start AC (AI-1) | **Yes** |
+| 2. Poisoned/exploded `u_track` → FF-only + reset + WARNING; recover without zone/idle/plant-off | Guard seam + latch; reset-after-success (AI-6); skip ωc commit on trip (AI-5) | **Yes** (unit) |
+| 3. Suite fails old path / passes fixed | exp_map thermal+C + Huang+absolute diverge + continuous bounded + guard (AI-3, AI-7) | **Yes** |
 | 4. ADR 0002 amended; ADR 0003 ωc-only unchanged | ADR 0002 text; empty ADR 0003 diff | **Yes** |
 
-Human may override. Open items AI-1–AI-7 remain tracked; none of them alone reverse the machine call that the epic’s declared numerical-blow-up fix landed, but AI-1 is the highest-risk operational residue before trusting live Plant Management with unmodified example gains.
+Initiative `initiative-fix-ladrc-blow-up` closed `done` (2026-10-17) with the epic — same single-epic Done when.
 
 ## Open questions
 
