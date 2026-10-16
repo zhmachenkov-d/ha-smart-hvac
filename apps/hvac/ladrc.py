@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 
 from hvac.models import LadrcConfig
 
-# Single-step Euler over full dt=60 is unstable for thermal-band ωo; two
-# equal substeps keep |1 − 2·h·ωo| well inside the unit circle.
+# Forward Euler: thermal CAP-5 (ωo=0.03, dt=60) needs 2 substeps —
+# one step: |1−2·dt·ωo|=2.6 > 1; two (h=30): |1−2·h·ωo|=0.8 < 1.
 _ESO_EULER_SUBSTEPS = 2
 
 

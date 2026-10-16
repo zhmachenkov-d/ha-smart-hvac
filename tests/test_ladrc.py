@@ -119,14 +119,16 @@ def test_clear_resets_state():
 
 
 def test_eso_bounded_with_60s_dt():
-    """One-step thermal continuous-form: |Δz1| stays modest at dt=60."""
+    """One-step thermal continuous-form: nonzero modest |Δz1| at dt=60."""
     config = _thermal_config()
     state = LadrcState(z1=18.0, z2=0.0)
     z1_prev = state.z1
     state.advance(20.0, 0.0, config)
+    delta = abs(state.z1 - z1_prev)
     assert math.isfinite(state.z1)
     assert math.isfinite(state.z2)
-    assert abs(state.z1 - z1_prev) < 5.0
+    # Lower bound rules out vacuous z1=y / u=0 (Δz1≡0); upper tightened vs 5.0.
+    assert 1.0 < delta < 3.0
 
 
 def test_compute_tracking_does_not_advance_eso():
