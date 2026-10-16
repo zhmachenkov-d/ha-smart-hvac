@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v0.2.2 (2026-10-16)
+
+### Bug Fixes
+
+- **hvac**: Advance ESO with tracking-residue known input
+  ([`a424b61`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/a424b617ada0bf07f3a9d14644e83a575b6110eb))
+
+### Documentation
+
+- Append PR #24 walkthrough log for commit+push
+  ([`2734472`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/2734472a45591acce16080c8b8bb20b7a2274bda))
+
+- Close PR #24 walkthrough blocks for wrap-up
+  ([`99a8ed6`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/99a8ed63531ba868a40f9777c514c660e8778560))
+
+- Mark story 1.1 continuous-form ESO done
+  ([`82ca04e`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/82ca04eb2ec05a6d47e1f365437e48b6509245b6))
+
+### Testing
+
+- **hvac**: Strengthen tracking-residue known-input locks
+  ([`e4567ab`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/e4567abf337efa94f7dc7a36923387e679f4a747))
+
+
 ## v0.2.1 (2026-10-16)
 
 ### Bug Fixes
