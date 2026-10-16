@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.2.3 (2026-10-16)
+
+### Bug Fixes
+
+- **ladrc**: Retune defaults, add u_track_max, amend ADR 0002
+  ([`81e3378`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/81e337898acdded76f56f66ae099f756bb8a8242))
+
+### Documentation
+
+- Add PR #26 walkthrough and mark story 1.3 done
+  ([`f87e80e`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/f87e80e439f3f18a0ff97d99194cfbd9adff36d9))
+
+
 ## v0.2.2 (2026-10-16)
 
 ### Bug Fixes
