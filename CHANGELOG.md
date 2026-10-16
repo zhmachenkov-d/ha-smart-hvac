@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v0.2.5 (2026-10-16)
+
+### Bug Fixes
+
+- **hvac**: Apply LADRC retro package A and trip-path hygiene
+  ([`5121a06`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/5121a06ea7de2a2421a2e4731deaa6a749b906a8))
+
+### Chores
+
+- **bmad**: Close LADRC blow-up epic and initiative
+  ([`28f8728`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/28f8728d299b908844b2462c8e4408096f806176))
+
+- **bmad**: Record walkthrough for PR #28 and mark story 1.5 done
+  ([`9feac76`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/9feac76b14270b475087573f78f904eded7fa512))
+
+### Refactoring
+
+- **hvac**: Sweep LADRC cleanup and zone-change latch hygiene
+  ([`9cb6eed`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/9cb6eedf1ad6298370c27bfd2207bf79327ae827))
+
+### Testing
+
+- **hvac**: Close LADRC retro verification gaps (AI-7)
+  ([`224e9db`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/224e9dbbfba439742eae1a5e1514e5e454f35d63))
+
+
 ## v0.2.4 (2026-10-16)
 
 ### Bug Fixes
