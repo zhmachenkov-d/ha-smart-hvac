@@ -190,3 +190,21 @@ Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:38:00+
 - Result: `e4567ab` `test(hvac): strengthen tracking-residue known-input locks`; strengtheners on PR branch. Periphery still in progress until user says done
 - Evidence: commit e4567ab; PR #24
 - Open: await Periphery done / Wrap-up; CI on new commit; this log entry may need a follow-up commit
+
+## 21 — Periphery — done
+
+Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:38:45+03:00
+
+- Action: User marked Periphery done
+- Result: all walkthrough blocks done; suggest Wrap-up (merge PR #24, optional story done/docs close)
+- Evidence: walkthrough-pr-24.md; commits e4567ab + 2734472 on PR branch
+- Open: await Wrap-up confirmation; do not merge until user asks
+
+## 22 — Wrap-up — started (1–4)
+
+Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:39:30+03:00
+
+- Action: User approved Wrap-up steps 1–4 (commit narrative, wait CI, merge PR #24, mark story 1.2 done)
+- Result: starting commit+push of closed narrative; CI was green on e4567ab/2734472
+- Evidence: user 1-4; gh pr checks 24 all pass prior to this commit
+- Open: merge then docs close for story done (pattern PR #23)

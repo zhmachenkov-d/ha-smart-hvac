@@ -2,7 +2,7 @@
 
 Target: [PR #24](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/24) (`fix/1-2-tracking-residue-known-input` → `main`)
 Focus: risks, boundaries, merge-readiness
-Current block: **Periphery** (in progress)
+Current block: closed — all blocks done; Wrap-up in progress (merge + story done)
 
 ## Blocks
 
@@ -10,7 +10,7 @@ Current block: **Periphery** (in progress)
 - [x] **Broad strokes** — done (call site first)
 - [x] **Known-input seam** — done
 - [x] **Wiring lock tests** — done (strengtheners 1–4)
-- [ ] **Periphery** — in progress
+- [x] **Periphery** — done (strengtheners committed+pushed)
 
 ## Intent
 
