@@ -11,10 +11,22 @@ from hvac.ladrc import LadrcState
 from hvac.ladrc_tuner import LadrcTuner
 from hvac.models import (
     HvacConfig,
+    LadrcConfig,
     ThermostatReading,
     ZoneSnapshot,
     plant_management_enabled,
 )
+
+
+def advance_with_tracking_residue(
+    ladrc: LadrcState,
+    measured: float,
+    command: float,
+    u_ff: float,
+    config: LadrcConfig,
+) -> None:
+    """Advance ESO with post-clamp tracking residue (command − u_ff)."""
+    ladrc.advance(measured, command - u_ff, config)
 
 
 class HvacApp(hass.Hass):
@@ -90,7 +102,13 @@ class HvacApp(hass.Hass):
         if not self._write_setpoint(command):
             return
 
-        self._ladrc.advance(decision.measured, command, effective_ladrc)
+        advance_with_tracking_residue(
+            self._ladrc,
+            decision.measured,
+            command,
+            u_ff,
+            effective_ladrc,
+        )
         if new_omega_c is not None:
             self._tuner.commit_omega_c(new_omega_c)
         self._tuner.publish_sensor(self)
