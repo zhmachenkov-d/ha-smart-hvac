@@ -2,7 +2,7 @@
 
 Target: [PR #22](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/22) (`fix/1-1-continuous-form-eso` → `main`)
 Focus: risks, boundaries, merge-readiness
-Current block: all blocks done — **Wrap-up** suggested
+Current block: closed — PR #22 merged; story 1.1 marked `done`
 
 ## Blocks
 
