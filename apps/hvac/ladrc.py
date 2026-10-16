@@ -1,11 +1,14 @@
-"""Discrete-time LADRC (first-order ESO + linear outer loop)."""
+"""Continuous-form LADRC (first-order ESO + linear outer loop)."""
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 from hvac.models import LadrcConfig
+
+# Forward Euler: thermal CAP-5 (ωo=0.03, dt=60) needs 2 substeps —
+# one step: |1−2·dt·ωo|=2.6 > 1; two (h=30): |1−2·h·ωo|=0.8 < 1.
+_ESO_EULER_SUBSTEPS = 2
 
 
 @dataclass
@@ -42,16 +45,20 @@ class LadrcState:
         u_applied: float,
         config: LadrcConfig,
     ) -> None:
-        """Advance the ESO one step using the actually applied plant command."""
-        dt = config.dt
-        error = measured - self.z1
-        omega_o = math.sqrt(config.beta2)
-        alpha = 1.0 - math.exp(-omega_o * dt)
-        g1 = 2.0 * alpha
-        g2 = alpha * alpha
+        """Advance the ESO one sample via continuous-form integration.
 
-        self.z1 = self.z1 + dt * (self.z2 + config.b0 * u_applied) + g1 * error
-        self.z2 = self.z2 + g2 * error
+        Continuous-form ESO (β1=2ωo, β2=ωo²):
+            ż1 = z2 + β1(y − z1) + b0·u
+            ż2 = β2(y − z1)
+        Integrated with forward Euler over equal substeps of the sample.
+        """
+        h = config.dt / _ESO_EULER_SUBSTEPS
+        beta1 = 2.0 * config.omega_o
+        beta2 = config.beta2
+        for _ in range(_ESO_EULER_SUBSTEPS):
+            err = measured - self.z1
+            self.z1 = self.z1 + h * (self.z2 + beta1 * err + config.b0 * u_applied)
+            self.z2 = self.z2 + h * (beta2 * err)
         self._last_u_applied = u_applied
 
     def clear(self) -> None:
