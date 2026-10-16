@@ -145,3 +145,12 @@ Session: unavailable · Timestamp: 2026-10-16T15:50:00+03:00
 - Result: MERGEABLE/CLEAN; all CI SUCCESS; PR body correctly tracer-scoped; deferred-work documents Huang CAP-3a; no Never-list files in PR. Local walkthrough/.memlog dirty — optional commit outside merge critical path
 - Evidence: gh pr view 22; deferred-work.md; story plan in PR
 - Open: Periphery awaiting done / Wrap-up
+
+## 17 — Periphery — commit+push walkthrough artifacts
+
+Session: unavailable · Timestamp: 2026-10-16T15:53:00+03:00
+
+- Action: User asked commit+push; staged only walkthrough-pr-22/; left .memlog.md uncommitted
+- Result: 9e47a76 docs: add PR #22 walkthrough for continuous-form ESO; pushed to origin/fix/1-1-continuous-form-eso
+- Evidence: walkthrough-pr-22.md; walkthrough-pr-22-log.md; PR #22
+- Open: Periphery block still awaiting done / Wrap-up; .memlog still dirty
