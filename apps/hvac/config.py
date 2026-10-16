@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from hvac.models import (
@@ -82,6 +83,9 @@ def _parse_ladrc(raw: Any, control_interval: int) -> LadrcConfig:
         raise ConfigError(
             "ladrc.omega_c must be strictly between omega_c_min and omega_c_max"
         )
+    u_track_max = float(raw.get("u_track_max", 250.0))
+    if not math.isfinite(u_track_max) or u_track_max <= 0:
+        raise ConfigError("ladrc.u_track_max must be a finite positive number")
     return LadrcConfig(
         b0=float(_require(raw, "b0")),
         omega_o=float(_require(raw, "omega_o")),
@@ -90,7 +94,7 @@ def _parse_ladrc(raw: Any, control_interval: int) -> LadrcConfig:
         omega_c_max=omega_c_max,
         tune=_parse_ladrc_tune(_require(raw, "tune")),
         dt=float(control_interval),
-        u_track_max=float(raw.get("u_track_max", 100.0)),
+        u_track_max=u_track_max,
     )
 
 

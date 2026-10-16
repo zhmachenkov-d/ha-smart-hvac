@@ -10,7 +10,7 @@ assignee: ""
 risk: high
 estimate: ""
 estimate_basis: ""
-status: in-progress
+status: done
 ---
 
 # Fix LADRC u_track blow-up
@@ -56,3 +56,4 @@ HVAC AppDaemon LADRC + example/config wiring + ADR 0002 prose. Not feedforward r
 - Decision: no platform-baseline epic; brownfield (2026-10-16).
 - Decision: optional refuse-to-advance after guard trip is in scope for the guard story (2026-10-16).
 - Decision: 2026-10-16 re-slice after party+spikes — primary fix continuous-form ESO (CAP-5); companion C known-input `(command − u_ff)`; MADRC out; Huang still invalid. Tracer = entry 1. Build order 1→2→3→4; entry 5 refactor sweep kept. Story 2 kept standalone (not merged). Prior retune→guard inception superseded; blocked plan for old story 1.1 is obsolete. Build-auto/loop: `plan_checkpoint` and `done_checkpoint` on all five entries.
+- Decision: 2026-10-17 closed epic (AI-8) after retro `accepted-with-open-items` and AI-1…AI-7 shipped; Done when #1–#4 met (pytest 54 green on ladrc/hvac_app/tuner). Default `u_track_max` is now 250 (package A), superseding the Notes line that said 100.

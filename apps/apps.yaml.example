@@ -17,11 +17,12 @@ hvac:
     b0: 5.0e-4
     omega_o: 0.03
     # Starting point for online ωc tune (ADR 0003); not the CAP-5 unit-test value.
-    omega_c: 0.053
+    # Package A (тепло): cold-start |e|=2 stays under u_track_max; see house-calibration.
+    omega_c: 0.03
     omega_c_min: 0.02
     omega_c_max: 0.15
-    # Live magnitude guard threshold (°C) for u_track blow-up recovery.
-    u_track_max: 100
+    # Live magnitude guard (°C). 250 pairs with example ωc so |e|≲3 °C is tracking, not trip.
+    u_track_max: 250
     tune:
       ki: 0.005
       deadband: 0.2

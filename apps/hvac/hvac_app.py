@@ -41,8 +41,6 @@ class GuardUTrackResult(NamedTuple):
 
 
 def guard_u_track(
-    ladrc: LadrcState,
-    measured: float,
     u_track: float,
     u_ff: float,
     u_track_max: float,
@@ -50,7 +48,10 @@ def guard_u_track(
     setpoint_max: float,
     latch_in: bool,
 ) -> GuardUTrackResult:
-    """Detect exploded u_track; on trip reset ESO and return ff-only command."""
+    """Detect exploded u_track; on trip return ff-only command (no ESO mutate).
+
+    Caller resets the ESO only after a successful plant write (AI-6).
+    """
     if not math.isfinite(u_track):
         tripped = True
         reason: str | None = "non-finite"
@@ -62,7 +63,6 @@ def guard_u_track(
         reason = None
 
     if tripped:
-        ladrc.reset(measured)
         command = max(setpoint_min, min(setpoint_max, u_ff))
     else:
         command = max(setpoint_min, min(setpoint_max, u_ff + u_track))
@@ -184,8 +184,6 @@ class HvacApp(hass.Hass):
             critical_zone=decision.critical_zone,
         )
         guard = guard_u_track(
-            self._ladrc,
-            decision.measured,
             u_track,
             u_ff,
             effective_ladrc.u_track_max,
@@ -206,6 +204,9 @@ class HvacApp(hass.Hass):
             )
         if not self._write_setpoint(guard.command):
             return
+        # AI-6: reset ESO only after successful plant write (not inside guard).
+        if guard.tripped:
+            self._ladrc.reset(decision.measured)
 
         advance_with_tracking_residue(
             self._ladrc,
@@ -214,7 +215,7 @@ class HvacApp(hass.Hass):
             u_ff,
             effective_ladrc,
         )
-        if new_omega_c is not None:
+        if new_omega_c is not None and not guard.tripped:
             self._tuner.commit_omega_c(new_omega_c)
         self._tuner.publish_sensor(self)
         if guard.tripped:

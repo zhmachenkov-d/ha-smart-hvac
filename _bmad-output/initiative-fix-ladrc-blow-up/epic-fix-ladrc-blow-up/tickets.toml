@@ -62,12 +62,16 @@ notes = ["CAP-3 part (c): guard path. Consumes u_track_max from entry 3. Optiona
 id = 5
 type = "story"
 title = "Refactor sweep"
-description = "Cleanup-only pass over the epic changeset: deferred review nits, naming, and dead paths introduced by entries 1–4. No new behavior; scope set at start from build records and deferred findings."
-verify = "uv run pytest still green; diff is cleanup-only (no new capabilities); no behavior change vs entries 1–4 Done when."
+description = "Cleanup pass over the epic changeset (deferred review nits, naming, dead paths) plus Critical Zone latch hygiene: clear _blow_up_latch on zone change so a new zone can WARNING (Decision A). No new capabilities; intentional latch behavior delta only."
+verify = "uv run pytest still green; no new capabilities vs entries 1–4; latch_after_zone_change Matrix (None→first, A→A, A→B) + demand-path warn-before-write inspect; control math/guard trip rules unchanged aside from latch clear on zone change."
 covers = []
 after = [1, 2, 3, 4]
 hitl = false
 risk = "low"
 plan_checkpoint = true
 done_checkpoint = true
-notes = ["Closing sweep per ordering; cleanup only — pushed-out scope becomes a new story."]
+notes = [
+  "Closing sweep per ordering.",
+  "F-S2/AI-4: verify must not claim 'no behavior change' — Decision A latch hygiene is intentional (story-refactor-sweep-plan / walkthrough-pr-28).",
+  "Pushed-out scope (Huang CAP-3a, u_track_max validation, refuse-to-advance) stays deferred.",
+]

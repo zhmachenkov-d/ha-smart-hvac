@@ -225,12 +225,18 @@ def test_parse_bandwidth_ladrc_config() -> None:
     config = parse_config(_minimal_args())
     assert config.ladrc.kp == pytest.approx(0.053)
     assert config.ladrc.beta2 == pytest.approx(19.49**2)
-    assert config.ladrc.u_track_max == pytest.approx(100.0)
+    assert config.ladrc.u_track_max == pytest.approx(250.0)
 
 
 def test_parse_u_track_max_explicit() -> None:
     config = parse_config(_minimal_args(ladrc={"u_track_max": 50}))
     assert config.ladrc.u_track_max == pytest.approx(50.0)
+
+
+def test_parse_rejects_non_positive_u_track_max() -> None:
+    for bad in (0, -1, float("nan"), float("inf")):
+        with pytest.raises(ConfigError, match="u_track_max must be a finite positive"):
+            parse_config(_minimal_args(ladrc={"u_track_max": bad}))
 
 
 def test_with_omega_c_preserves_u_track_max() -> None:
@@ -241,7 +247,7 @@ def test_with_omega_c_preserves_u_track_max() -> None:
 
 
 def test_parse_apps_yaml_example() -> None:
-    """Real example file → CAP-3(b) b0/ωo and u_track_max=100."""
+    """Real example file → package A b0/ωo/ωc and u_track_max=250."""
     raw = yaml.safe_load((ROOT / "apps" / "apps.yaml.example").read_text())
     assert isinstance(raw, dict) and "hvac" in raw
     args = dict(raw["hvac"])
@@ -250,8 +256,8 @@ def test_parse_apps_yaml_example() -> None:
     config = parse_config(args)
     assert config.ladrc.b0 == pytest.approx(5.0e-4)
     assert config.ladrc.omega_o == pytest.approx(0.03)
-    assert config.ladrc.omega_c == pytest.approx(0.053)
-    assert config.ladrc.u_track_max == pytest.approx(100.0)
+    assert config.ladrc.omega_c == pytest.approx(0.03)
+    assert config.ladrc.u_track_max == pytest.approx(250.0)
 
 
 def test_parse_rejects_omega_c_outside_bounds() -> None:
