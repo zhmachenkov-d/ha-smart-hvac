@@ -50,11 +50,11 @@ def _thermal_config() -> LadrcConfig:
 
 
 def _example_aligned_config() -> LadrcConfig:
-    """CAP-3(b): same thermal b0/ωo as example YAML; product omega_c=0.053."""
+    """CAP-3(b) / AI-1 package A: same b0/ωo/ωc/u_track_max as apps.yaml.example."""
     return LadrcConfig(
         b0=5e-4,
         omega_o=0.03,
-        omega_c=0.053,
+        omega_c=0.03,
         omega_c_min=0.02,
         omega_c_max=0.15,
         tune=LadrcTuneConfig(
@@ -64,6 +64,7 @@ def _example_aligned_config() -> LadrcConfig:
             max_rate_fraction=0.05,
         ),
         dt=60.0,
+        u_track_max=250.0,
     )
 
 
@@ -103,6 +104,19 @@ def _run_thermal_c_ticks(
             _advance_exp_map(state, _Y, u, config)
         else:
             state.advance(_Y, u, config)
+    return u_tracks
+
+
+def _run_huang_absolute_exp_map_ticks(
+    state: LadrcState, config: LadrcConfig
+) -> list[float]:
+    """Pre-fix path: Huang gains + absolute SWT into frozen exp_map."""
+    u_tracks: list[float] = []
+    for _ in range(_N_TICKS):
+        u_track = state.compute_tracking(_Y, _T_R, config, _ZONE)
+        u_tracks.append(u_track)
+        command = min(_CLAMP_MAX, max(_CLAMP_MIN, _U_FF + u_track))
+        _advance_exp_map(state, _Y, command, config)
     return u_tracks
 
 
@@ -178,6 +192,14 @@ def test_cap5_exp_map_thermal_c_diverges():
     assert any((not math.isfinite(u)) or abs(u) >= 1e6 for u in u_tracks)
 
 
+def test_cap3a_huang_absolute_exp_map_diverges():
+    """CAP-3a Huang half: frozen exp_map + Huang + absolute SWT diverges."""
+    config = _default_config()
+    state = LadrcState()
+    u_tracks = _run_huang_absolute_exp_map_ticks(state, config)
+    assert any((not math.isfinite(u)) or abs(u) >= 1e6 for u in u_tracks)
+
+
 def test_cap5_continuous_thermal_c_bounded():
     """Production continuous-form + thermal+C: |u_track|<100 every tick for N=80."""
     config = _thermal_config()
@@ -190,11 +212,32 @@ def test_cap5_continuous_thermal_c_bounded():
 
 
 def test_cap3b_example_aligned_continuous_c_bounded():
-    """CAP-3(b): example-aligned gains + continuous + C: |u_track|<100 for N=80."""
+    """CAP-3(b): example gains + continuous + C stay under u_track_max."""
     config = _example_aligned_config()
     state = LadrcState()
     u_tracks = _run_thermal_c_ticks(state, config, use_exp_map=False)
     assert all(math.isfinite(u) for u in u_tracks)
     assert math.isfinite(state.z1)
     assert math.isfinite(state.z2)
-    assert all(abs(u) < 100.0 for u in u_tracks)
+    assert all(abs(u) < config.u_track_max for u in u_tracks)
+
+
+def test_ai1_example_cold_start_e2_no_trip():
+    """Package A (тепло): after zone reset, |e|=2 → |u_track| under u_track_max."""
+    config = _example_aligned_config()
+    state = LadrcState()
+    measured, reference = 19.0, 21.0  # |e|=2
+    u_track = state.compute_tracking(measured, reference, config, _ZONE)
+    assert math.isfinite(u_track)
+    assert abs(u_track) < config.u_track_max
+    assert abs(abs(u_track) - config.omega_c * 2.0 / config.b0) < 1e-9
+
+
+def test_ai1_example_cold_start_e5_may_trip():
+    """Package A: |e|=5 → |u_track| exceeds u_track_max (guard may trip)."""
+    config = _example_aligned_config()
+    state = LadrcState()
+    measured, reference = 16.0, 21.0  # |e|=5
+    u_track = state.compute_tracking(measured, reference, config, _ZONE)
+    assert math.isfinite(u_track)
+    assert abs(u_track) > config.u_track_max

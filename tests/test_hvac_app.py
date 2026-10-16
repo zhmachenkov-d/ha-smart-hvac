@@ -42,17 +42,13 @@ def _config() -> LadrcConfig:
 
 
 def _run_guard(
-    ladrc: LadrcState,
     *,
-    measured: float = 21.0,
     u_track: float,
     u_ff: float = 40.0,
     latch_in: bool = False,
     u_track_max: float = _U_TRACK_MAX,
 ):
     return guard_u_track(
-        ladrc,
-        measured,
         u_track,
         u_ff,
         u_track_max,
@@ -150,92 +146,76 @@ def test_hvac_app_config_matches_cap5_thermal_band():
 # --- CAP-3(c): blow-up guard seam (Hass-free) ---
 
 
-def test_guard_healthy_clamps_sum_no_reset():
-    ladrc = LadrcState()
-    ladrc.reset(21.0)
-    ladrc.z2 = 0.5
-    z2_before = ladrc.z2
+def test_guard_healthy_clamps_sum_no_trip():
     u_ff = 42.0
     u_track = 5.0
 
-    result = _run_guard(ladrc, u_track=u_track, u_ff=u_ff)
+    result = _run_guard(u_track=u_track, u_ff=u_ff)
 
     assert result.command == u_ff + u_track
     assert result.tripped is False
     assert result.should_warn is False
     assert result.latch_out is False
     assert result.reason is None
-    assert ladrc.z2 == z2_before
 
 
-def test_guard_magnitude_trip_resets_and_ff_only():
+def test_guard_magnitude_trip_ff_only_no_eso_mutate():
+    """Seam returns ff-only; does not reset ESO (AI-6: reset after write)."""
     ladrc = LadrcState()
     ladrc.reset(21.0)
     ladrc.z2 = 1.0
     u_ff = 42.0
     u_track = 150.0
 
-    result = _run_guard(ladrc, measured=21.5, u_track=u_track, u_ff=u_ff)
+    result = _run_guard(u_track=u_track, u_ff=u_ff)
 
     assert result.tripped is True
     assert result.should_warn is True
     assert result.latch_out is True
     assert result.reason == "magnitude"
     assert result.command == u_ff
-    assert ladrc.z1 == 21.5
-    assert ladrc.z2 == 0.0
+    assert ladrc.z1 == 21.0
+    assert ladrc.z2 == 1.0
 
 
 def test_guard_non_finite_trip():
-    ladrc = LadrcState()
-    ladrc.reset(21.0)
-
     for bad in (float("nan"), float("inf"), float("-inf")):
-        ladrc.z2 = 3.0
-        result = _run_guard(ladrc, measured=20.0, u_track=bad, u_ff=45.0)
+        result = _run_guard(u_track=bad, u_ff=45.0)
         assert result.tripped is True
         assert result.should_warn is True
         assert result.latch_out is True
         assert result.reason == "non-finite"
         assert result.command == 45.0
-        assert ladrc.z2 == 0.0
-        assert ladrc.z1 == 20.0
 
 
 def test_guard_consecutive_trips_warn_only_first():
-    ladrc = LadrcState()
-    ladrc.reset(21.0)
     latch = False
     warns = []
     for _ in range(3):
-        result = _run_guard(ladrc, u_track=200.0, latch_in=latch)
+        result = _run_guard(u_track=200.0, latch_in=latch)
         warns.append(result.should_warn)
         latch = result.latch_out
         assert result.tripped is True
         assert result.command == 40.0
-        assert ladrc.z2 == 0.0
 
     assert warns == [True, False, False]
 
 
 def test_guard_latch_clears_on_healthy_then_warns_again():
-    ladrc = LadrcState()
-    ladrc.reset(21.0)
-
-    trip1 = _run_guard(ladrc, u_track=200.0, latch_in=False)
+    trip1 = _run_guard(u_track=200.0, latch_in=False)
     assert trip1.should_warn is True
 
-    healthy = _run_guard(ladrc, u_track=1.0, latch_in=trip1.latch_out)
+    healthy = _run_guard(u_track=1.0, latch_in=trip1.latch_out)
     assert healthy.tripped is False
     assert healthy.latch_out is False
     assert healthy.should_warn is False
 
-    trip2 = _run_guard(ladrc, u_track=200.0, latch_in=healthy.latch_out)
+    trip2 = _run_guard(u_track=200.0, latch_in=healthy.latch_out)
     assert trip2.should_warn is True
 
 
 def test_guard_poisoned_z2_via_compute_tracking():
-    """CAP-3(c): large z2 → exploded u_track → ff-only + post-reset z2==0."""
+    """CAP-3(c)+AI-6: trip → ff-only; reset then advance (post-write order)."""
     config = _config()
     ladrc = LadrcState()
     measured = 21.0
@@ -253,8 +233,6 @@ def test_guard_poisoned_z2_via_compute_tracking():
 
     u_ff = 40.0
     result = _run_guard(
-        ladrc,
-        measured=measured,
         u_track=u_track,
         u_ff=u_ff,
         u_track_max=config.u_track_max,
@@ -262,8 +240,10 @@ def test_guard_poisoned_z2_via_compute_tracking():
 
     assert result.tripped is True
     assert result.command == u_ff
-    assert ladrc.z2 == 0.0
+    assert ladrc.z2 == 1e12  # seam does not reset
 
+    ladrc.reset(measured)
+    assert ladrc.z2 == 0.0
     advance_with_tracking_residue(ladrc, measured, result.command, u_ff, config)
     assert ladrc._last_u_applied == 0.0
 
@@ -331,9 +311,30 @@ def test_idle_paths_clear_blow_up_latch():
 def test_control_tick_trip_info_uses_guarded_marker():
     src = inspect.getsource(HvacApp.control_tick)
     assert "guarded" in src
-    # Trip INFO must not format raw u_track with .2f (would crash on nan/inf).
-    trip_branch = src.split("if guard.tripped:")[1].split("else:")[0]
+    # Log trip branch is the last `if guard.tripped:` (after AI-6 reset).
+    log_trip = src.rsplit("if guard.tripped:", 1)[1]
+    trip_branch = log_trip.split("else:")[0]
     assert "guarded" in trip_branch
     assert "u_track={u_track:.2f}" not in trip_branch
-    healthy_branch = src.split("if guard.tripped:")[1].split("else:")[1]
+    healthy_branch = log_trip.split("else:")[1]
     assert "u_track={u_track:.2f}" in healthy_branch
+
+
+def test_control_tick_skips_commit_omega_c_when_guard_tripped():
+    """AI-5 / F-R2: persist adapted ωc only on healthy post-write ticks."""
+    src = inspect.getsource(HvacApp.control_tick)
+    assert "if new_omega_c is not None and not guard.tripped:" in src
+    assert src.index("_write_setpoint(guard.command)") < src.index("commit_omega_c")
+
+
+def test_control_tick_resets_eso_after_successful_write_on_trip():
+    """AI-6 / F-R4: ESO reset only after plant write succeeds, before advance."""
+    src = inspect.getsource(HvacApp.control_tick)
+    write_i = src.index("_write_setpoint(guard.command)")
+    # Trip reset lives in the post-write block (not inside guard_u_track).
+    post_write = src[write_i:]
+    assert "self._ladrc.reset(decision.measured)" in post_write
+    assert post_write.index("self._ladrc.reset(decision.measured)") < post_write.index(
+        "advance_with_tracking_residue"
+    )
+    assert "ladrc.reset" not in inspect.getsource(guard_u_track)

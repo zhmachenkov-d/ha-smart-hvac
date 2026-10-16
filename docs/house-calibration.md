@@ -48,14 +48,20 @@ Huang et al. coil-flow gains (`b₀ ≈ 2.8`, large `ωo`) **must not** be used 
 ```yaml
 ladrc:
   b0: 5.0e-4      # typical band ~1e-4 … 1e-3
-  omega_o: 0.03   # typical band ~0.01 … 0.05
-  omega_c: 0.053  # start for online ωc tune (ADR 0003)
+  omega_o: 0.03   # Euler-stable at dt=60 / 2 substeps: ~0.01 … below 1/30≈0.033 (0.05 is unstable)
+  omega_c: 0.03   # start for online ωc tune (ADR 0003); paired with u_track_max below
+  u_track_max: 250  # magnitude guard; with example b0/ωc, |e|≲3 °C stays tracking
 ```
+
+After a Critical Zone reset, `|u_track| ≈ ωc·|e|/b0`. Example package A keeps cold-start `|e|=2` under the guard (`≈120 < 250`); `|e|=5` may trip. Raise `u_track_max` or lower `ωc` together if you change either.
+
+Forward-Euler ESO (`apps/hvac/ladrc.py`, `_ESO_EULER_SUBSTEPS=2`): stability needs `|1 − 2·h·ωo| < 1` with `h = dt/2`. At `dt=60`, that is **`ωo` below `1/30 ≈ 0.033`**. Do not use the old “~0.05” upper end — it reintroduces divergence the continuous-form change fixed. If you raise `control_interval`, lower `ωo` or expect a code change to derive substeps from `ωo·dt`.
 
 | Parameter | Effect |
 |-----------|--------|
 | `b0` | Estimated air °C per second per water °C. Too small → aggressive `u_track`; too large → sluggish loop. |
-| `omega_o` | Observer Bandwidth. Higher → faster disturbance tracking, more noise; lower → quieter, slower. Fixed at config time. |
+| `omega_o` | Observer Bandwidth. Higher → faster disturbance tracking, more noise; lower → quieter, slower. Fixed at config time. Stay in the Euler-stable band above. |
+| `u_track_max` | App-level blow-up guard (°C). Trip → FF-only + ESO reset. Not a comfort clamp — keep above routine cold-start `|u_track|`. |
 
 Neither `b0` nor `ωo` is adapted online.
 
