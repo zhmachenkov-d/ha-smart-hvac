@@ -119,8 +119,8 @@ Dispositions: **fix now** / **defer** / **accept**. Each finding lists source th
   **Source:** `guard_u_track` + `advance_with_tracking_residue`; `hvac_app.py:64–66,210–216`.  
   **Disposition:** defer (also F-V2 test gap).  
 - **F-R6 — `u_track_max` parse has no positivity/finiteness check.**  
-  **Source:** `apps/hvac/config.py` `_parse_ladrc` (`raw.get(..., 100.0)`).  
-  **Disposition:** defer (explicitly out of 1.5 Never; was known).  
+  **Source:** `apps/hvac/config.py` `_parse_ladrc`.  
+  **Disposition:** fix now (done AI-7) — reject non-finite / ≤0.  
 - **F-R7 — Huang-scale fixtures remain default in unit helpers while ADR forbids them on the plant.**  
   **Source:** `tests/test_ladrc.py:18–32`; ADR 0002.  
   **Disposition:** defer (test hygiene; linked to F-S1).  
@@ -138,13 +138,13 @@ Overlaps F-R2, F-R4, F-R6, F-R8 — same dispositions; no additional unique find
 - **F-V1 (=F-S1)** — Huang diverge lock missing. **Disposition:** fix now (done AI-3).  
 - **F-V2 — Trip path never tested with `u_ff` outside `[setpoint_min, setpoint_max]`.** Trip tests use in-band `u_ff` and assert `command==u_ff`.  
   **Source:** `tests/test_hvac_app.py` guard trip tests; `guard_u_track` clamp on trip.  
-  **Disposition:** defer.  
+  **Disposition:** fix now (done AI-7) — `test_guard_trip_clamps_out_of_band_uff`.  
 - **F-V3 — `control_tick` inspect locks do not assert `if guard.should_warn` or `self._blow_up_latch = guard.latch_out`.** Once-per-episode Floor is unit-tested on the seam, not the call site.  
-  **Source:** `tests/test_hvac_app.py` ~290–328 vs `hvac_app.py:196–206`.  
-  **Disposition:** defer.  
+  **Source:** `tests/test_hvac_app.py` vs `hvac_app.py` warn/latch wiring.  
+  **Disposition:** fix now (done AI-7) — `test_control_tick_wires_should_warn_and_latch_out`.  
 - **F-V4 — `test_hvac_app_config_matches_cap5_thermal_band` asserts helper constants against themselves.** Real example lock is `test_parse_apps_yaml_example`.  
-  **Source:** `tests/test_hvac_app.py:142–147`; `tests/test_ladrc_tuner.py:243–254`.  
-  **Disposition:** defer (delete or repoint test).
+  **Source:** `tests/test_hvac_app.py`; `tests/test_ladrc_tuner.py`.  
+  **Disposition:** fix now (done AI-7) — deleted tautological helper test.
 
 ## Behavior verification
 
@@ -176,7 +176,7 @@ Proposed only — not applied by this retro. Owners are suggestions.
 | AI-4 | **Done (2026-10-17):** `tickets.toml` entry 5 description/verify/notes aligned with Decision A latch hygiene (no longer claims “no behavior change”) | — | F-S2 |
 | AI-5 | **Done (2026-10-17):** `commit_omega_c` gated by `not guard.tripped`; inspect lock in `test_hvac_app.py` | — | F-R2 |
 | AI-6 | **Done (2026-10-17):** reset-after-success — `guard_u_track` no longer mutates ESO; `control_tick` resets after successful write then advances; seam + inspect locks | — | F-R4 |
-| AI-7 | Tests: out-of-band `u_ff` trip clamp; `control_tick` `should_warn`/`latch_out` lock; remove tautological CAP-5 helper test; optional `u_track_max` parse validation | Next fix / cleanup | F-V2–V4, F-R6 |
+| AI-7 | **Done (2026-10-17):** out-of-band `u_ff` trip clamp test; `should_warn`/`latch_out` inspect lock; deleted tautological CAP-5 helper test; `u_track_max` finite-positive parse validation | — | F-V2–V4, F-R6 |
 | AI-8 | Close epic via `bmad-ticket` after human accepts verdict (board still `in-progress`) | Human | workflow |
 
 **Process lessons (no code change):** keep entry `verify` in sync when plan Intent moves; joint-test gain×threshold across ticket boundaries; when deferring a Done when half, amend Done when in the same change.

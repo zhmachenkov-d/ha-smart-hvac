@@ -135,14 +135,6 @@ def test_advance_with_tracking_residue_negative_when_command_below_uff():
     assert state._last_u_applied == -10.0
 
 
-def test_hvac_app_config_matches_cap5_thermal_band():
-    config = _config()
-    assert config.b0 == _THERMAL_B0
-    assert config.omega_o == _THERMAL_OMEGA_O
-    assert config.omega_c == _THERMAL_OMEGA_C
-    assert config.dt == _THERMAL_DT
-
-
 # --- CAP-3(c): blow-up guard seam (Hass-free) ---
 
 
@@ -176,6 +168,17 @@ def test_guard_magnitude_trip_ff_only_no_eso_mutate():
     assert result.command == u_ff
     assert ladrc.z1 == 21.0
     assert ladrc.z2 == 1.0
+
+
+def test_guard_trip_clamps_out_of_band_uff():
+    """AI-7 / F-V2: trip command is clamp(u_ff), not raw u_ff."""
+    low = _run_guard(u_track=200.0, u_ff=30.0)  # below setpoint_min
+    assert low.tripped is True
+    assert low.command == _SETPOINT_MIN
+
+    high = _run_guard(u_track=200.0, u_ff=70.0)  # above setpoint_max
+    assert high.tripped is True
+    assert high.command == _SETPOINT_MAX
 
 
 def test_guard_non_finite_trip():
@@ -318,6 +321,19 @@ def test_control_tick_trip_info_uses_guarded_marker():
     assert "u_track={u_track:.2f}" not in trip_branch
     healthy_branch = log_trip.split("else:")[1]
     assert "u_track={u_track:.2f}" in healthy_branch
+
+
+def test_control_tick_wires_should_warn_and_latch_out():
+    """AI-7 / F-V3: once-per-episode Floor is wired at the control_tick call site."""
+    src = inspect.getsource(HvacApp.control_tick)
+    assert "self._blow_up_latch = guard.latch_out" in src
+    assert "if guard.should_warn:" in src
+    assert src.index("self._blow_up_latch = guard.latch_out") < src.index(
+        "if guard.should_warn:"
+    )
+    assert src.index("if guard.should_warn:") < src.index(
+        "_write_setpoint(guard.command)"
+    )
 
 
 def test_control_tick_skips_commit_omega_c_when_guard_tripped():

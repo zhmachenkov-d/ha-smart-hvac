@@ -233,6 +233,12 @@ def test_parse_u_track_max_explicit() -> None:
     assert config.ladrc.u_track_max == pytest.approx(50.0)
 
 
+def test_parse_rejects_non_positive_u_track_max() -> None:
+    for bad in (0, -1, float("nan"), float("inf")):
+        with pytest.raises(ConfigError, match="u_track_max must be a finite positive"):
+            parse_config(_minimal_args(ladrc={"u_track_max": bad}))
+
+
 def test_with_omega_c_preserves_u_track_max() -> None:
     config = parse_config(_minimal_args(ladrc={"u_track_max": 75}))
     retuned = config.ladrc.with_omega_c(0.08)
