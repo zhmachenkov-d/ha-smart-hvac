@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -91,16 +91,7 @@ class LadrcConfig:
         return self.omega_o * self.omega_o
 
     def with_omega_c(self, omega_c: float) -> LadrcConfig:
-        return LadrcConfig(
-            b0=self.b0,
-            omega_o=self.omega_o,
-            omega_c=omega_c,
-            omega_c_min=self.omega_c_min,
-            omega_c_max=self.omega_c_max,
-            tune=self.tune,
-            dt=self.dt,
-            u_track_max=self.u_track_max,
-        )
+        return replace(self, omega_c=omega_c)
 
 
 def plant_management_enabled(switch_state: str | None) -> bool:

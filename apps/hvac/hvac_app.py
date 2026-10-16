@@ -98,6 +98,17 @@ def format_blow_up_warning(
     )
 
 
+def latch_after_zone_change(
+    prev_zone: str | None,
+    new_zone: str | None,
+    latch_in: bool,
+) -> bool:
+    """Clear blow-up latch only when Critical Zone actually changes."""
+    if prev_zone is not None and prev_zone != new_zone:
+        return False
+    return latch_in
+
+
 class HvacApp(hass.Hass):
     def initialize(self) -> None:
         try:
@@ -160,6 +171,12 @@ class HvacApp(hass.Hass):
         )
 
         u_ff = weather_feedforward(outdoor, config.weather_feedforward)
+        prev_zone = self._ladrc.critical_zone
+        self._blow_up_latch = latch_after_zone_change(
+            prev_zone,
+            decision.critical_zone,
+            self._blow_up_latch,
+        )
         u_track = self._ladrc.compute_tracking(
             measured=decision.measured,
             reference=decision.reference,
