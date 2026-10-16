@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.2.4 (2026-10-16)
+
+### Bug Fixes
+
+- **hvac**: Add LADRC u_track blow-up guard in hvac_app
+  ([`18e21d1`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/18e21d100e4884fda3f3c824198872e228caeb14))
+
+### Chores
+
+- **bmad**: Record story 1.4 party-mode decisions in memlog
+  ([`6d392ce`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/6d392ce28bf479539e058e1e63bf6478d61cdcf2))
+
+- **bmad**: Record walkthrough for 18e21d1 and mark story 1.4 done
+  ([`c4ecbd5`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/c4ecbd51982755b97bdc62d4aba22e22b6f1001c))
+
+### Documentation
+
+- Add house calibration guide and link from README
+  ([`c6e3431`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/c6e34310f7ad7d257292889a514048fd54973697))
+
+
 ## v0.2.3 (2026-10-16)
 
 ### Bug Fixes
