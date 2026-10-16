@@ -171,16 +171,11 @@ def test_advance_uses_u_applied():
 
 
 def test_cap5_exp_map_thermal_c_diverges():
-    """Frozen exp_map + thermal+C: diverges (non-finite or |u_track|≥1e6)."""
+    """Frozen exp_map + thermal+C: track blows (non-finite or |u_track|≥1e6)."""
     config = _thermal_config()
     state = LadrcState()
     u_tracks = _run_thermal_c_ticks(state, config, use_exp_map=True)
-    diverged = (
-        any((not math.isfinite(u)) or abs(u) >= 1e6 for u in u_tracks)
-        or (not math.isfinite(state.z1))
-        or (not math.isfinite(state.z2))
-    )
-    assert diverged
+    assert any((not math.isfinite(u)) or abs(u) >= 1e6 for u in u_tracks)
 
 
 def test_cap5_continuous_thermal_c_bounded():

@@ -7,6 +7,7 @@ from hvac.hvac_app import (
     advance_with_tracking_residue,
     format_blow_up_warning,
     guard_u_track,
+    latch_after_zone_change,
 )
 from hvac.ladrc import LadrcState
 from hvac.models import LadrcConfig, LadrcTuneConfig
@@ -291,6 +292,29 @@ def test_control_tick_calls_guard_after_compute_tracking():
     assert src.index("compute_tracking") < src.index("guard_u_track")
     assert "format_blow_up_warning" in src
     assert "self._ladrc.guard" not in src
+
+
+def test_control_tick_warns_before_write_on_demand_path():
+    """Demand path: format_blow_up_warning before _write_setpoint(guard.command)."""
+    src = inspect.getsource(HvacApp.control_tick)
+    demand = src.split("if not decision.has_demand:")[1].split("return", 1)[1]
+    assert demand.index("format_blow_up_warning") < demand.index(
+        "_write_setpoint(guard.command)"
+    )
+
+
+def test_latch_after_zone_change_matrix():
+    assert latch_after_zone_change("A", "B", True) is False
+    assert latch_after_zone_change("A", "A", True) is True
+    assert latch_after_zone_change(None, "B", True) is True
+    assert latch_after_zone_change("A", "B", False) is False
+    assert latch_after_zone_change("A", "A", False) is False
+    assert latch_after_zone_change(None, "B", False) is False
+
+
+def test_control_tick_latch_helper_before_compute_tracking():
+    src = inspect.getsource(HvacApp.control_tick)
+    assert src.index("latch_after_zone_change") < src.index("compute_tracking")
 
 
 def test_idle_paths_clear_blow_up_latch():
