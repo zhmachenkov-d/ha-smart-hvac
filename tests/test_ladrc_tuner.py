@@ -4,10 +4,13 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from hvac.config import ConfigError, parse_config
 from hvac.ladrc_tuner import LadrcTuner
 from hvac.models import LadrcConfig, LadrcTuneConfig
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _default_tune() -> LadrcTuneConfig:
@@ -180,43 +183,75 @@ def test_out_of_bounds_persisted_value_ignored(tmp_path: Path) -> None:
     assert tuner.omega_c == pytest.approx(0.053)
 
 
+def _minimal_args(*, ladrc: dict | None = None) -> dict:
+    base_ladrc = {
+        "b0": 2.8,
+        "omega_o": 19.49,
+        "omega_c": 0.053,
+        "omega_c_min": 0.02,
+        "omega_c_max": 0.15,
+        "tune": {
+            "ki": 0.005,
+            "deadband": 0.2,
+            "min_steady_ticks": 5,
+            "max_rate_fraction": 0.05,
+        },
+    }
+    if ladrc is not None:
+        base_ladrc.update(ladrc)
+    return {
+        "outdoor_temperature": "sensor.outdoor",
+        "plant_management": "switch.pm",
+        "plant_setpoint": "number.setpoint",
+        "setpoint_min": 40,
+        "setpoint_max": 55,
+        "zones": [
+            {
+                "name": "living_room",
+                "temperature": "sensor.temp",
+                "thermostats": ["climate.thermostat"],
+            }
+        ],
+        "weather_feedforward": {
+            "base": 25,
+            "slope": 1.2,
+            "comfort_ref": 20,
+        },
+        "ladrc": base_ladrc,
+    }
+
+
 def test_parse_bandwidth_ladrc_config() -> None:
-    config = parse_config(
-        {
-            "outdoor_temperature": "sensor.outdoor",
-            "plant_management": "switch.pm",
-            "plant_setpoint": "number.setpoint",
-            "setpoint_min": 40,
-            "setpoint_max": 55,
-            "zones": [
-                {
-                    "name": "living_room",
-                    "temperature": "sensor.temp",
-                    "thermostats": ["climate.thermostat"],
-                }
-            ],
-            "weather_feedforward": {
-                "base": 25,
-                "slope": 1.2,
-                "comfort_ref": 20,
-            },
-            "ladrc": {
-                "b0": 2.8,
-                "omega_o": 19.49,
-                "omega_c": 0.053,
-                "omega_c_min": 0.02,
-                "omega_c_max": 0.15,
-                "tune": {
-                    "ki": 0.005,
-                    "deadband": 0.2,
-                    "min_steady_ticks": 5,
-                    "max_rate_fraction": 0.05,
-                },
-            },
-        }
-    )
+    config = parse_config(_minimal_args())
     assert config.ladrc.kp == pytest.approx(0.053)
     assert config.ladrc.beta2 == pytest.approx(19.49**2)
+    assert config.ladrc.u_track_max == pytest.approx(100.0)
+
+
+def test_parse_u_track_max_explicit() -> None:
+    config = parse_config(_minimal_args(ladrc={"u_track_max": 50}))
+    assert config.ladrc.u_track_max == pytest.approx(50.0)
+
+
+def test_with_omega_c_preserves_u_track_max() -> None:
+    config = parse_config(_minimal_args(ladrc={"u_track_max": 75}))
+    retuned = config.ladrc.with_omega_c(0.08)
+    assert retuned.u_track_max == pytest.approx(75.0)
+    assert retuned.omega_c == pytest.approx(0.08)
+
+
+def test_parse_apps_yaml_example() -> None:
+    """Real example file → CAP-3(b) b0/ωo and u_track_max=100."""
+    raw = yaml.safe_load((ROOT / "apps" / "apps.yaml.example").read_text())
+    assert isinstance(raw, dict) and "hvac" in raw
+    args = dict(raw["hvac"])
+    args.pop("module", None)
+    args.pop("class", None)
+    config = parse_config(args)
+    assert config.ladrc.b0 == pytest.approx(5.0e-4)
+    assert config.ladrc.omega_o == pytest.approx(0.03)
+    assert config.ladrc.omega_c == pytest.approx(0.053)
+    assert config.ladrc.u_track_max == pytest.approx(100.0)
 
 
 def test_parse_rejects_omega_c_outside_bounds() -> None:
