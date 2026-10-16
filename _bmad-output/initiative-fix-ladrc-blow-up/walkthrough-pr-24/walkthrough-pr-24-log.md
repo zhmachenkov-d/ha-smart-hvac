@@ -181,3 +181,12 @@ Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:37:30+
 - Result: Plan/PR messaging OK for half CAP-1. Findings: (1) local strengtheners+walkthrough not on PR yet — merge gap until commit/push; (2) PR body still says story 1.2 OK, avoid CAP-1 done claim; (3) out-of-scope list correct. Disposition open
 - Evidence: PR #24; story plan; dirty tests/test_hvac_app.py + walkthrough-pr-24/
 - Open: await done/commit/wrap-up
+
+## 20 — Periphery — commit+push
+
+Session: c250d733-0953-4430-bc20-39881c9df912 · Timestamp: 2026-10-16T17:38:00+03:00
+
+- Action: User requested commit+push; committed tests + walkthrough-pr-24; pushed to origin
+- Result: `e4567ab` `test(hvac): strengthen tracking-residue known-input locks`; strengtheners on PR branch. Periphery still in progress until user says done
+- Evidence: commit e4567ab; PR #24
+- Open: await Periphery done / Wrap-up; CI on new commit; this log entry may need a follow-up commit
