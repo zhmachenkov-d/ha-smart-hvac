@@ -172,3 +172,12 @@ Session: unavailable · Timestamp: 2026-10-16T15:57:00+03:00
 - Result: Review closed; follow-through proposed = merge PR #22 as CAP-5 tracer (await explicit merge OK)
 - Evidence: walkthrough-pr-22.md; PR #22
 - Open: Merge not executed until user confirms
+
+## 20 — Closure — PR merged; story 1.1 done
+
+Session: unavailable · Timestamp: 2026-10-16T16:00:00+03:00
+
+- Action: User asked to close out 1.1; verified pytest/ruff green; PR #22 already MERGED (8f62bef); `tickets.py mark 1.1 done`
+- Result: Story Continuous-form ESO in LadrcState → status `done`; board unblocks 1.2 (Tracking-residue known input)
+- Evidence: story-continuous-form-eso-in-ladrcstate-plan.md status=done; PR #22; tests/test_ladrc.py 8 passed
+- Open: none for 1.1; next ready = 1.2

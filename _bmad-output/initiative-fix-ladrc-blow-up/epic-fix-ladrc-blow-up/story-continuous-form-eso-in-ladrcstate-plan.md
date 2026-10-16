@@ -3,7 +3,7 @@ title: 'Continuous-form ESO in LadrcState'
 type: 'bugfix'
 ticket: '1'
 created: '2026-10-16'
-status: 'built'
+status: done
 baseline_revision: 'a3b10592ebafdcc25c8766583a1ddac3c4df622b'
 route: 'full'
 route_source: 'auto'
