@@ -90,6 +90,7 @@ def _parse_ladrc(raw: Any, control_interval: int) -> LadrcConfig:
         omega_c_max=omega_c_max,
         tune=_parse_ladrc_tune(_require(raw, "tune")),
         dt=float(control_interval),
+        u_track_max=float(raw.get("u_track_max", 100.0)),
     )
 
 

@@ -80,6 +80,7 @@ class LadrcConfig:
     omega_c_max: float
     tune: LadrcTuneConfig
     dt: float = 60.0
+    u_track_max: float = 100.0
 
     @property
     def kp(self) -> float:
@@ -98,6 +99,7 @@ class LadrcConfig:
             omega_c_max=self.omega_c_max,
             tune=self.tune,
             dt=self.dt,
+            u_track_max=self.u_track_max,
         )
 
 

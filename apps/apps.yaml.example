@@ -14,11 +14,14 @@ hvac:
     slope: 1.2
     comfort_ref: 20
   ladrc:
-    b0: 2.8
-    omega_o: 19.49
+    b0: 5.0e-4
+    omega_o: 0.03
+    # Starting point for online ωc tune (ADR 0003); not the CAP-5 unit-test value.
     omega_c: 0.053
     omega_c_min: 0.02
     omega_c_max: 0.15
+    # Magnitude guard threshold (°C); not enforced until blow-up recovery lands.
+    u_track_max: 100
     tune:
       ki: 0.005
       deadband: 0.2

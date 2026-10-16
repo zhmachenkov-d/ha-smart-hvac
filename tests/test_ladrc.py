@@ -49,6 +49,24 @@ def _thermal_config() -> LadrcConfig:
     )
 
 
+def _example_aligned_config() -> LadrcConfig:
+    """CAP-3(b): same thermal b0/ωo as example YAML; product omega_c=0.053."""
+    return LadrcConfig(
+        b0=5e-4,
+        omega_o=0.03,
+        omega_c=0.053,
+        omega_c_min=0.02,
+        omega_c_max=0.15,
+        tune=LadrcTuneConfig(
+            ki=0.005,
+            deadband=0.2,
+            min_steady_ticks=5,
+            max_rate_fraction=0.05,
+        ),
+        dt=60.0,
+    )
+
+
 def _advance_exp_map(
     state: LadrcState,
     measured: float,
@@ -168,6 +186,17 @@ def test_cap5_exp_map_thermal_c_diverges():
 def test_cap5_continuous_thermal_c_bounded():
     """Production continuous-form + thermal+C: |u_track|<100 every tick for N=80."""
     config = _thermal_config()
+    state = LadrcState()
+    u_tracks = _run_thermal_c_ticks(state, config, use_exp_map=False)
+    assert all(math.isfinite(u) for u in u_tracks)
+    assert math.isfinite(state.z1)
+    assert math.isfinite(state.z2)
+    assert all(abs(u) < 100.0 for u in u_tracks)
+
+
+def test_cap3b_example_aligned_continuous_c_bounded():
+    """CAP-3(b): example-aligned gains + continuous + C: |u_track|<100 for N=80."""
+    config = _example_aligned_config()
     state = LadrcState()
     u_tracks = _run_thermal_c_ticks(state, config, use_exp_map=False)
     assert all(math.isfinite(u) for u in u_tracks)
