@@ -2,6 +2,45 @@
 
 <!-- version list -->
 
+## v0.2.1 (2026-10-16)
+
+### Bug Fixes
+
+- **ladrc**: Replace exp_map ESO with continuous-form advance
+  ([`035013b`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/035013b37679354b7dcb220f9e81ce3021d5f496))
+
+### Documentation
+
+- Add LADRC blow-up fix initiative, spec, and epic tickets
+  ([`f1f0245`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/f1f0245a593f309dcc46ae92c99eb852f75b7a49))
+
+- Add PR #22 walkthrough for continuous-form ESO
+  ([`9e47a76`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/9e47a76fcdca12ec0442cd74213d4cdc24adf5dc))
+
+- Close CC-gate open-PR migration deferred entry
+  ([`2d33ed8`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/2d33ed891774a0b5358c96fedfb1e190c6477d95))
+
+- Close PR #22 walkthrough blocks
+  ([`3096d4d`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/3096d4d01cdc4bcaa2a88d704ab7ba309ef096a6))
+
+- Close PSR release-train deferred after v0.2.0 verify
+  ([`9fdcbb6`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/9fdcbb641c476528e15b843e4900ff2c35d0b037))
+
+- Log walkthrough commit for PR #22
+  ([`9ab2b74`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/9ab2b74541dd682faa8db762539a6e5731285dc4))
+
+- Reframe LADRC blow-up around continuous-form ESO
+  ([`49612de`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/49612def4cd14d325164e2506d49a35e33daeb23))
+
+- Update party-mode memlog for continuous-form ESO plan
+  ([`be48666`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/be48666b1d1c008bfbd458329173cce3ec082e63))
+
+### Testing
+
+- **ladrc**: Tighten one-step Δz1 AC and Euler comment
+  ([`8c09bc2`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/8c09bc2f568757f15db34e3612d009283fcf0872))
+
+
 ## v0.2.0 (2026-10-03)
 
 ### Chores
