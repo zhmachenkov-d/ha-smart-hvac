@@ -1,7 +1,6 @@
 ---
 title: 'Package C deferred stub locks'
 type: 'bugfix'
-ticket: ''
 created: '2026-10-17'
 status: 'built'
 baseline_revision: '16a14bff2f0e895eb445bcfe27513a00cffb7b32'

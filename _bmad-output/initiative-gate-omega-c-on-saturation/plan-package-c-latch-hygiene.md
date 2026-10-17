@@ -1,7 +1,6 @@
 ---
 title: 'Package C latch hygiene'
 type: 'bugfix'
-ticket: ''
 created: '2026-10-17'
 status: built
 baseline_revision: '3435c63d01cf0cd4c1d9a28b695e89fe680677af'

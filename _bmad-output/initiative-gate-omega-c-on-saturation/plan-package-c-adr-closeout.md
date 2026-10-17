@@ -1,7 +1,6 @@
 ---
 title: 'Package C ADR and retrospective close-out'
 type: 'chore'
-ticket: ''
 created: '2026-10-17'
 status: 'built'
 baseline_revision: '0f5badd02e3ad0d9476258caff6a209b57bb610f'
