@@ -1,0 +1,12 @@
+# Epic breakdown — build order is table order.
+
+[[entry]]
+id = 1
+type = "story"
+title = "Verify stranger HACS install"
+description = "On a Home Assistant instance that is not Exclusive Session, add this repo as a HACS AppDaemon custom repository, install from a published Release, set app_dir when the add-on default differs from the HACS path, create apps.yaml beside ha_smart_hvac/ from root apps.yaml.example (module: ha_smart_hvac), and confirm HvacApp loads."
+verify = "AppDaemon logs show HvacApp initialized without missing-module or wrong-path errors; package directory ha_smart_hvac is under the HACS apps path for that instance."
+covers = ["E1", "R4"]
+after = []
+hitl = true
+risk = "medium"

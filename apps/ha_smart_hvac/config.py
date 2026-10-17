@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from hvac.models import (
+from ha_smart_hvac.models import (
     HvacConfig,
     LadrcConfig,
     LadrcTuneConfig,

@@ -1,7 +1,7 @@
 """Tests for weather feedforward."""
 
-from hvac.feedforward import weather_feedforward
-from hvac.models import WeatherFeedforwardConfig
+from ha_smart_hvac.feedforward import weather_feedforward
+from ha_smart_hvac.models import WeatherFeedforwardConfig
 
 
 def test_linear_formula():

@@ -2,7 +2,7 @@
 
 import pytest
 
-from hvac.models import plant_management_enabled
+from ha_smart_hvac.models import plant_management_enabled
 
 
 @pytest.mark.parametrize(

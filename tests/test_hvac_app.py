@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from hvac.config import parse_config
-from hvac.feedforward import weather_feedforward
-from hvac.hvac_app import (
+from ha_smart_hvac.config import parse_config
+from ha_smart_hvac.feedforward import weather_feedforward
+from ha_smart_hvac.hvac_app import (
     LATCH_DECAY_U_TRACK_FRACTION,
     HvacApp,
     advance_with_tracking_residue,
@@ -22,9 +22,9 @@ from hvac.hvac_app import (
     should_apply_omega_c,
     sticky_blow_up_latch,
 )
-from hvac.ladrc import LadrcState
-from hvac.ladrc_tuner import LadrcTuner
-from hvac.models import LadrcConfig, LadrcTuneConfig
+from ha_smart_hvac.ladrc import LadrcState
+from ha_smart_hvac.ladrc_tuner import LadrcTuner
+from ha_smart_hvac.models import LadrcConfig, LadrcTuneConfig
 
 # Locked CAP-5 thermal band (same numbers as tests/test_ladrc.py _thermal_config).
 _THERMAL_B0 = 5e-4

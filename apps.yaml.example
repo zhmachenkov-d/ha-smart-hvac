@@ -1,7 +1,8 @@
-# Copy to apps/apps.yaml and replace placeholder entity IDs with your house wiring.
+# Copy to apps/apps.yaml (Exclusive Session) or beside ha_smart_hvac/ under AppDaemon
+# app_dir (HACS/Production). Replace YOUR_* placeholders with house entity IDs.
 # apps/apps.yaml is gitignored — do not commit live entity IDs.
 hvac:
-  module: hvac
+  module: ha_smart_hvac
   class: HvacApp
   outdoor_temperature: sensor.YOUR_OUTDOOR_TEMPERATURE
   plant_management: switch.YOUR_PLANT_MANAGEMENT

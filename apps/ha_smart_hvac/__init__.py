@@ -1,5 +1,5 @@
 """HVAC LADRC AppDaemon package."""
 
-from hvac.hvac_app import HvacApp
+from ha_smart_hvac.hvac_app import HvacApp
 
 __all__ = ["HvacApp"]

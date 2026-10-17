@@ -17,22 +17,37 @@ FILTERED_APPS_YAML_PATHS = (
 def test_exclusive_session_app_dir_points_at_repo_apps():
     text = (ROOT / "appdaemon" / "appdaemon.yaml").read_text(encoding="utf-8")
     assert "app_dir: ../apps" in text
-    assert not (ROOT / "appdaemon" / "apps" / "hvac").exists()
+    assert not (ROOT / "appdaemon" / "apps" / "ha_smart_hvac").exists()
     assert not (ROOT / "appdaemon" / "apps").is_symlink()
 
 
-def test_fresh_clone_example_has_placeholders_only():
-    example = ROOT / "apps" / "apps.yaml.example"
-    assert example.is_file()
-    text = example.read_text(encoding="utf-8")
-    assert "YOUR_" in text
-    assert "module: hvac" in text
+def test_apps_contains_only_package_directory():
+    """HACS AppDaemon: only one directory under apps/; no sibling files."""
+    apps = ROOT / "apps"
     tracked = subprocess.check_output(
         ["git", "ls-files", "apps"],
         cwd=ROOT,
         text=True,
+    ).splitlines()
+    assert tracked, "expected tracked files under apps/"
+    for path in tracked:
+        assert path.startswith("apps/ha_smart_hvac/"), path
+    assert (apps / "ha_smart_hvac" / "__init__.py").is_file()
+    assert not (apps / "apps.yaml.example").exists()
+
+
+def test_fresh_clone_example_has_placeholders_only():
+    example = ROOT / "apps.yaml.example"
+    assert example.is_file()
+    text = example.read_text(encoding="utf-8")
+    assert "YOUR_" in text
+    assert "module: ha_smart_hvac" in text
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "apps.yaml.example", "apps"],
+        cwd=ROOT,
+        text=True,
     )
-    assert "apps/apps.yaml.example" in tracked
+    assert "apps.yaml.example" in tracked
     assert "apps/apps.yaml\n" not in tracked and not tracked.endswith("apps/apps.yaml")
 
 
@@ -53,7 +68,7 @@ def test_history_has_no_live_apps_yaml_entity_ids():
 
 def test_hacs_json_name():
     data = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
-    assert data == {"name": "ha-smart-hvac", "render_readme": True}
+    assert data == {"name": "ha_smart_hvac", "render_readme": True}
 
 
 def test_validate_workflow_hacs_appdaemon():
