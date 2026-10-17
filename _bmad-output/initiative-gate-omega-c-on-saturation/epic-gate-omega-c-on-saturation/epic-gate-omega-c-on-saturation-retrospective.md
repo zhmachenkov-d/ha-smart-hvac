@@ -39,7 +39,7 @@ headless: false
 | Previous retrospective | yes | sibling initiative `epic-fix-ladrc-blow-up-retrospective.md` (prior epic in product history) |
 | Session logs | **narrowed** | walkthroughs pr-31/34/36/39 used; raw Cursor agent JSONL not treated as structured process logs |
 | Walkthroughs | yes | pr-31, pr-34, pr-36, pr-39 |
-| Deferred work | cleared | initiative `deferred-work.md` — companion wording synced in 1.5 |
+| Deferred work | partial | initiative `deferred-work.md` — Package C framing closed; AI-4/AI-5 still deferred |
 | Architecture / PRD folders | **no** | spec companions + ADR used instead |
 
 **Code churn highlights (non-merge `files`, epic-wide apps/tests/docs):** `tests/test_hvac_app.py` +496/−55; `apps/hvac/hvac_app.py` +218/−106 (file 327 → 439 LOC); docs ADR 0003 +4 / house-calibration +2.
@@ -150,6 +150,20 @@ Passing unit tests do not substitute for a live heating-demand run under Plant M
 
 Ran via `bmad-party-mode` (`product-team`, session mode) over sourced Phase 2 findings. Room framed open items as recovery-story risk (post-latch ωc rebound, WARN spam) vs test hygiene. **Human decision (2026-10-17):** package **C** — AI-1 `clear_steady` on `latch_at_start` + AI-2 WARN/fail-write hygiene + AI-3 one Hass-stubbed `control_tick` integration lock. Idle fail-closed (AI-4) and min-side/zone×latch tests (AI-5) stay deferred. Did not change machine verdict (`accepted-with-open-items`).
 
+### Package C close-out (2026-10-17)
+
+AI-1 / AI-2 / AI-3 from the table below landed after this retrospective:
+
+| ID | Landed? | Evidence |
+|----|---------|----------|
+| AI-1 | yes | `hvac_app.py` `clear_steady()` on `latch_at_start`; Hass rebound lock in Package C (`plan-package-c-latch-hygiene`, PR #41) |
+| AI-2 | yes | app-level `_blow_up_warned` episode WARN gate in `hvac_app.py`; fail-write does not sticky/decay; companion CAP-4 / WARN episode wording (PR #41) |
+| AI-3 | yes | Hass-stubbed `control_tick` locks in Package C + deferred Q5 multi-tick decay persist and equal-value write-on-change side effects (PR #41 / #43) |
+
+Phase 2 Findings dispositions above remain the retro-time snapshot (`fix now` / `defer`); follow-through is this close-out table, not rewritten finding text. ADR 0003 Guards Package C wording is synced separately in `plan-package-c-adr-closeout`.
+
+AI-4 and AI-5 remain deferred backlog. Machine verdict stays `accepted-with-open-items` for those (and live Exclusive Session still unexercised).
+
 ## Previous-retro follow-through
 
 Prior file: `_bmad-output/initiative-fix-ladrc-blow-up/epic-fix-ladrc-blow-up/epic-fix-ladrc-blow-up-retrospective.md`.
@@ -173,9 +187,9 @@ Proposed only — not applied by this retro. Owners are suggestions.
 
 | ID | Item | Owner | From |
 |----|------|-------|------|
-| AI-1 | On `latch_at_start`, call `self._tuner.clear_steady()` (or equivalent) so CAP-4 decay is not immediately undone by a hot steady counter; add a regression that warm-steady → N latched ticks → clear does not propose on the first unlatched tick | Amelia / next build | F-S2, F-R1 |
-| AI-2 | Fix trip-edge WARN / latch interaction when `_write_setpoint` fails: preserve once-per-episode warn without claiming plant success; ensure flaky reads do not spam WARNING every 60 s | Amelia / next build | F-R2, F-E1 |
-| AI-3 | Add one Hass-stubbed `control_tick` integration lock: latched skip-adapt + decay persist; fail-write trip does not sticky/decay; optional equal-value write-on-change still completes tick side effects | Amelia / next build | F-V1 |
+| AI-1 | On `latch_at_start`, call `self._tuner.clear_steady()` (or equivalent) so CAP-4 decay is not immediately undone by a hot steady counter; add a regression that warm-steady → N latched ticks → clear does not propose on the first unlatched tick | Amelia / Package C | F-S2, F-R1 — **closed** (see Package C close-out) |
+| AI-2 | Fix trip-edge WARN / latch interaction when `_write_setpoint` fails: preserve once-per-episode warn without claiming plant success; ensure flaky reads do not spam WARNING every 60 s | Amelia / Package C | F-R2, F-E1 — **closed** (see Package C close-out) |
+| AI-3 | Add one Hass-stubbed `control_tick` integration lock: latched skip-adapt + decay persist; fail-write trip does not sticky/decay; optional equal-value write-on-change still completes tick side effects | Amelia / Package C | F-V1 — **closed** (see Package C close-out) |
 | AI-4 | Defer: idle/`_go_idle` fail-closed symmetry with demand abort | backlog | F-R3 |
 | AI-5 | Defer: min-side ratchet + zone-change×latch_at_start tests | backlog | F-V2, F-V3, F-E2 |
 
@@ -191,16 +205,16 @@ Proposed only — not applied by this retro. Owners are suggestions.
 |-----------|----------|------|
 | 1. CAP-1/2 saturated upward no-ratchet; blocked proposal not applied | `should_apply_omega_c` + strict re-track; CAP-6(a)(b) tests; 96 passed | **Yes** (unit) |
 | 2. CAP-3 equal skip without abort; unreadable aborts | `_write_setpoint`; CAP-6(c)(d) tests | **Yes** (demand path); idle asymmetry deferred F-R3 |
-| 3. CAP-4 latched skip-adapt + decay to band | helpers + mirrors + inspect skip-adapt; 96 passed | **Yes** (unit); post-clear rebound open AI-1 |
+| 3. CAP-4 latched skip-adapt + decay to band | helpers + mirrors + inspect skip-adapt; Package C `clear_steady` + Hass locks | **Yes** (unit + Package C) |
 | 4. CAP-5 docs criterion A | ADR 0003 Guards; house-calibration §5 | **Yes** |
 | 5. CAP-6 pytest green | **96 passed** on touched modules | **Yes** |
 
-Open items AI-1..AI-3 are improvements / hardening beyond the letter of Done when; they do not flip the machine call to rejected.
+AI-1..AI-3 closed by Package C (see close-out above). Remaining open items AI-4/AI-5 (and live Exclusive Session) keep the machine call at `accepted-with-open-items`; they do not flip it to rejected.
 
 ## Open questions
 
-1. Should skip-adapt also freeze `_last_critical_zone` / other tuner state, or only `_steady_ticks`?  
-2. Is WARN-on-every-failed-trip-write acceptable ops noise, or must once-per-episode survive flaky HA?  
+1. Should skip-adapt also freeze `_last_critical_zone` / other tuner state beyond the Package C `_steady_ticks` clear?  
+2. ~~Is WARN-on-every-failed-trip-write acceptable ops noise, or must once-per-episode survive flaky HA?~~ **Settled by Package C:** once-per-episode via `_blow_up_warned`.  
 3. Is live Exclusive Session verification required before treating the initiative as production-proven, given unit-only behavior check?  
 4. Should gray-band sticky remain tracking-on (current CAP-4), or move toward ff-only while decaying?
 
