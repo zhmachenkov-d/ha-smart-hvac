@@ -181,3 +181,12 @@ Session: unavailable · Timestamp: 2026-10-17T05:56:00+03:00
 - Result: In progress.
 - Evidence: walkthrough-pr-39; control-tick-behaviors CAP-2 intro; inspect rename; status fields
 - Open: push + CI + merge
+
+## 21 — wrap-up — complete
+
+Session: unavailable · Timestamp: 2026-10-17T05:48:30+03:00
+
+- Action: Pushed dcdc8b6; CI green; merged PR #39; deleted refactor/1-5-omega-c-sweep; story 1.5 + epic + initiative status done on main.
+- Result: Wrap-up finished.
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/39 ; merge 1132a73
+- Open: none
