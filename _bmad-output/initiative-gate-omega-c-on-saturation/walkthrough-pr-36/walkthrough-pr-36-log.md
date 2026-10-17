@@ -156,11 +156,11 @@ Session: unavailable · Timestamp: 2026-10-17T05:06:00+03:00
 - Evidence: user "да"
 - Open: executing
 
-## 14 — Periphery — done
+## 16 — wrap-up — complete
 
-Session: unavailable · Timestamp: 2026-10-17T05:05:30+03:00
+Session: unavailable · Timestamp: 2026-10-17T05:08:30+03:00
 
-- Action: User said Periphery done.
-- Result: All blocks accepted; walkthrough ready for wrap-up.
-- Evidence: Periphery Thoughts notes
-- Open: wrap-up (commit walkthrough, push, merge PR #36, mark story 1.3 done) — await user confirmation
+- Action: Pushed 62f77ae; CI green; merged PR #36; deleted feat/1-3-write-on-change-setpoint; story plan status done on main.
+- Result: Wrap-up finished. Next epic entry is Story 4 docs (CAP-5).
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/36 ; merge 5e373a9; story 1.3 status done
+- Open: none
