@@ -1,18 +1,25 @@
 """Tests for hvac_app known-input wiring (tracking residue) and blow-up guard."""
 
 import inspect
+import json
+from pathlib import Path
 
 import pytest
 
 from hvac.hvac_app import (
+    LATCH_DECAY_U_TRACK_FRACTION,
     HvacApp,
     advance_with_tracking_residue,
     format_blow_up_warning,
     guard_u_track,
     latch_after_zone_change,
+    latch_decay_residue_holds,
+    next_decayed_omega_c,
     should_commit_omega_c,
+    sticky_blow_up_latch,
 )
 from hvac.ladrc import LadrcState
+from hvac.ladrc_tuner import LadrcTuner
 from hvac.models import LadrcConfig, LadrcTuneConfig
 
 # Locked CAP-5 thermal band (same numbers as tests/test_ladrc.py _thermal_config).
@@ -326,14 +333,13 @@ def test_control_tick_trip_info_uses_guarded_marker():
     assert "u_track={u_track:.2f}" in healthy_branch
 
 
-def test_control_tick_wires_should_warn_and_latch_out():
-    """AI-7 / F-V3: once-per-episode Floor is wired at the control_tick call site."""
+def test_control_tick_wires_should_warn_and_sticky_latch():
+    """AI-7 / F-V3 + CAP-4: sticky latch after write-path guard; WARN before write."""
     src = inspect.getsource(HvacApp.control_tick)
-    assert "self._blow_up_latch = guard.latch_out" in src
+    assert "sticky_blow_up_latch(" in src
+    assert "guard.latch_out" not in src
     assert "if guard.should_warn:" in src
-    assert src.index("self._blow_up_latch = guard.latch_out") < src.index(
-        "if guard.should_warn:"
-    )
+    assert src.index("sticky_blow_up_latch(") < src.index("if guard.should_warn:")
     assert src.index("if guard.should_warn:") < src.index(
         "_write_setpoint(guard.command)"
     )
@@ -343,18 +349,36 @@ def test_control_tick_skips_commit_omega_c_when_guard_tripped():
     """AI-5 / F-R2: persist adapted ωc only via should_commit_omega_c after write."""
     src = inspect.getsource(HvacApp.control_tick)
     write_i = src.index("_write_setpoint(guard.command)")
-    # Provisional apply gate before write; commit gate after write.
+    # Provisional apply gate before write; commit gate after write (else of decay).
     assert src.index("should_commit_omega_c") < write_i
     post_write = src[write_i:]
     assert "omega_to_commit = new_omega_c if apply_proposed else None" in post_write
     commit_gate = "if should_commit_omega_c("
     assert commit_gate in post_write
-    # Match the tuner call, not the substring inside should_commit_omega_c.
-    commit_call = "_tuner.commit_omega_c"
-    assert commit_call in post_write
-    assert post_write.index(commit_gate) < post_write.index(commit_call)
+    # Normal commit lives in the else of the CAP-4 decay branch.
+    normal_commit = post_write.split(commit_gate, 1)[1]
+    assert "_tuner.commit_omega_c" in normal_commit
     # Must not regress to persistence-only gating (guard.tripped alone).
     assert "if new_omega_c is not None and not guard.tripped:" not in src
+    # CAP-4: decay branch before normal should_commit else.
+    assert "latch_decay_residue_holds" in post_write
+    assert "next_decayed_omega_c" in post_write
+    assert post_write.index("next_decayed_omega_c") < post_write.index(commit_gate)
+
+
+def test_control_tick_skips_maybe_adapt_when_latched_at_start():
+    """CAP-6(e): latch already active at tick start → maybe_adapt not called."""
+    src = inspect.getsource(HvacApp.control_tick)
+    demand = src.split("if not decision.has_demand:")[1].split("return", 1)[1]
+    adapt_call = "self._tuner.maybe_adapt("
+    assert "latch_at_start = self._blow_up_latch" in demand
+    assert demand.index("latch_at_start = self._blow_up_latch") < demand.index(
+        adapt_call
+    )
+    assert "if latch_at_start:" in demand
+    skip_block = demand.split("if latch_at_start:")[1].split("else:")[0]
+    assert "new_omega_c = None" in skip_block
+    assert adapt_call not in skip_block
 
 
 @pytest.mark.parametrize(
@@ -476,3 +500,232 @@ def test_control_tick_resets_eso_after_successful_write_on_trip():
         "advance_with_tracking_residue"
     )
     assert "ladrc.reset" not in inspect.getsource(guard_u_track)
+
+
+# --- CAP-4 / CAP-6(e): latch decay + skip adapt ---
+
+
+def _decay_config(*, omega_c: float = 0.10) -> LadrcConfig:
+    """Config with headroom above omega_c_min so decay steps are observable."""
+    return LadrcConfig(
+        b0=_THERMAL_B0,
+        omega_o=_THERMAL_OMEGA_O,
+        omega_c=omega_c,
+        omega_c_min=0.02,
+        omega_c_max=0.15,
+        tune=LadrcTuneConfig(
+            ki=0.005,
+            deadband=0.2,
+            min_steady_ticks=5,
+            max_rate_fraction=0.05,
+        ),
+        dt=_THERMAL_DT,
+        u_track_max=_U_TRACK_MAX,
+    )
+
+
+@pytest.mark.parametrize(
+    ("u_track", "u_track_max", "expected"),
+    [
+        (81.0, 100.0, True),  # just above 0.8·max
+        (80.0, 100.0, False),  # at band
+        (50.0, 100.0, False),  # below band
+        (100.0, 100.0, True),  # at trip magnitude
+        (150.0, 100.0, True),  # above trip
+        (float("nan"), 100.0, True),
+        (float("inf"), 100.0, True),
+        (float("-inf"), 100.0, True),
+    ],
+)
+def test_latch_decay_residue_holds_matrix(
+    u_track: float, u_track_max: float, expected: bool
+) -> None:
+    assert latch_decay_residue_holds(u_track, u_track_max) is expected
+
+
+def test_latch_decay_fraction_constant() -> None:
+    assert LATCH_DECAY_U_TRACK_FRACTION == 0.8
+
+
+def test_next_decayed_omega_c_step_and_floor() -> None:
+    assert next_decayed_omega_c(0.10, 0.05, 0.02) == pytest.approx(0.095)
+    # Floor at omega_c_min.
+    assert next_decayed_omega_c(0.021, 0.05, 0.02) == pytest.approx(0.02)
+    assert next_decayed_omega_c(0.02, 0.05, 0.02) == pytest.approx(0.02)
+
+
+@pytest.mark.parametrize(
+    ("latch_in", "tripped", "u_track", "expected"),
+    [
+        (False, True, 150.0, True),  # trip sets
+        (True, False, 90.0, True),  # hold in (0.8·max, max]
+        (True, False, 100.0, True),  # hold at max (not tripped; abs==max)
+        (True, False, 80.0, False),  # clear at ≤ band
+        (True, False, 50.0, False),  # clear below band
+        (False, False, 90.0, False),  # no latch_in, not tripped
+        (True, True, 150.0, True),  # trip while already latched
+        (True, False, float("nan"), True),  # non-finite holds
+    ],
+)
+def test_sticky_blow_up_latch_matrix(
+    latch_in: bool, tripped: bool, u_track: float, expected: bool
+) -> None:
+    """CAP-4 sticky latch: trip sets; holds in (0.8·max, max]; clears at ≤ band."""
+    assert sticky_blow_up_latch(latch_in, tripped, u_track, _U_TRACK_MAX) is expected
+
+
+def _mirror_decay_tick(
+    *,
+    tuner: LadrcTuner,
+    config: LadrcConfig,
+    latch: bool,
+    u_track: float,
+    u_ff: float = 40.0,
+) -> bool:
+    """Hass-free mirror of control_tick sticky latch + decay commit branch."""
+    latch_in = latch
+    guard = guard_u_track(
+        u_track,
+        u_ff,
+        config.u_track_max,
+        _SETPOINT_MIN,
+        _SETPOINT_MAX,
+        latch_in,
+    )
+    latch_out = sticky_blow_up_latch(
+        latch_in, guard.tripped, u_track, config.u_track_max
+    )
+    if latch_out and latch_decay_residue_holds(u_track, config.u_track_max):
+        tuner.commit_omega_c(
+            next_decayed_omega_c(
+                tuner.omega_c,
+                config.tune.max_rate_fraction,
+                config.omega_c_min,
+            )
+        )
+    return latch_out
+
+
+def test_multi_tick_decay_persists_until_omega_c_min(tmp_path: Path) -> None:
+    """CAP-6(e): latched ticks with |u_track| above band decay persisted ωc to floor."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+    assert tuner.omega_c == pytest.approx(0.10)
+
+    # Residue in (0.8·max, max]: not tripped, sticky holds, decay runs.
+    u_track = 90.0
+    latch = True
+    for _ in range(200):
+        latch = _mirror_decay_tick(
+            tuner=tuner, config=config, latch=latch, u_track=u_track
+        )
+        if tuner.omega_c <= config.omega_c_min + 1e-12:
+            break
+
+    assert latch is True
+    assert tuner.omega_c == pytest.approx(config.omega_c_min)
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(config.omega_c_min)
+    reloaded = LadrcTuner(config, state_path)
+    assert reloaded.omega_c == pytest.approx(config.omega_c_min)
+
+
+def test_decay_stops_when_residue_at_or_below_band(tmp_path: Path) -> None:
+    """Finite |u_track| ≤ 0.8·u_track_max clears sticky latch and skips decay."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+
+    latch = True
+    latch = _mirror_decay_tick(tuner=tuner, config=config, latch=latch, u_track=90.0)
+    assert latch is True
+    after_decay = tuner.omega_c
+    assert after_decay < 0.10
+
+    latch = _mirror_decay_tick(tuner=tuner, config=config, latch=latch, u_track=80.0)
+    assert latch is False
+    assert tuner.omega_c == pytest.approx(after_decay)
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(after_decay)
+
+
+def test_non_finite_u_track_decay_persists(tmp_path: Path) -> None:
+    """CAP-6(e): latched + non-finite u_track steps ωc down via real commit_omega_c."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+    expected = next_decayed_omega_c(
+        0.10, config.tune.max_rate_fraction, config.omega_c_min
+    )
+
+    latch = _mirror_decay_tick(
+        tuner=tuner, config=config, latch=True, u_track=float("nan")
+    )
+
+    assert latch is True
+    assert tuner.omega_c == pytest.approx(expected)
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(expected)
+
+
+def test_trip_edge_decay_persists_despite_guard_trip(tmp_path: Path) -> None:
+    """CAP-6(e): trip-edge latches and decay-persists; normal commit still skips."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+    current = tuner.omega_c
+    u_track = 150.0
+    u_ff = 40.0
+
+    # Latch inactive at start (trip-edge); adapt may have proposed — commit blocked.
+    guard = guard_u_track(
+        u_track,
+        u_ff,
+        config.u_track_max,
+        _SETPOINT_MIN,
+        _SETPOINT_MAX,
+        False,
+    )
+    assert guard.tripped is True
+    assert (
+        should_commit_omega_c(
+            0.11,
+            current,
+            guard_tripped=guard.tripped,
+            command=guard.command,
+            setpoint_min=_SETPOINT_MIN,
+            setpoint_max=_SETPOINT_MAX,
+        )
+        is False
+    )
+
+    expected = next_decayed_omega_c(
+        current, config.tune.max_rate_fraction, config.omega_c_min
+    )
+    latch = _mirror_decay_tick(
+        tuner=tuner, config=config, latch=False, u_track=u_track, u_ff=u_ff
+    )
+
+    assert latch is True
+    assert tuner.omega_c == pytest.approx(expected)
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(expected)
+    reloaded = LadrcTuner(config, state_path)
+    assert reloaded.omega_c == pytest.approx(expected)
+
+
+def test_single_decay_step_matches_max_rate_fraction(tmp_path: Path) -> None:
+    """Acceptance: one latched high-residue tick decreases persisted ωc by one step."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+    expected = next_decayed_omega_c(
+        0.10, config.tune.max_rate_fraction, config.omega_c_min
+    )
+
+    _mirror_decay_tick(tuner=tuner, config=config, latch=True, u_track=90.0)
+
+    assert tuner.omega_c == pytest.approx(expected)
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(expected)
