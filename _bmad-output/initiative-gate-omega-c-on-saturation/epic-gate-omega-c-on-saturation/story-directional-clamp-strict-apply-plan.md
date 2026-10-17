@@ -23,14 +23,15 @@ context:
 
 **Problem:** Healthy-but-saturated ticks still apply and commit upward ωc while Set Water Temperature sits at `setpoint_max`, ratcheting the tuner until a later ESO reset latches soft-kill.
 
-**Approach:** Add directional `should_commit_omega_c` (skip on guard trip, max+ωc↑, min+ωc↓; allow relieving moves) and strict apply so a blocked proposal never enters **write-path** `with_omega_c` / `compute_tracking` (a provisional pass may still evaluate proposed ωc for the apply gate). Wire both in `control_tick`; lock with a commit matrix and a Hass-free saturated upward-proposal ratchet regression.
+**Approach:** Add directional `should_commit_omega_c` (skip on guard trip, max+ωc↑, min+ωc↓; allow relieving moves) and strict apply so a blocked proposal never enters **write-path** `with_omega_c` / `compute_tracking` / persistence. An **apply-signal** may run a provisional track+guard with proposed ωc only to evaluate the helper; if blocked, discard and track/write with committed ωc, and do not re-evaluate commit on the final guard. Wire both in `control_tick`; lock with a commit matrix and a Hass-free saturated upward-proposal ratchet regression.
 
 ## Boundaries & Constraints
 
 **Always:**
 - Directional clamp and strict apply together (persistence-only gating forbidden).
 - Commit still skipped on guard trip; relieving ωc at a clamp may commit.
-- Pre-track apply decision follows the architecture diagram: choose committed vs proposed ωc before the tracking used for write/advance.
+- Provisional evaluate of proposed ωc for the apply gate is allowed; a blocked proposal must not enter write-path tracking or persistence.
+- Choose committed vs proposed ωc for **write-path** tracking before that tracking runs (architecture “Directional blocks apply?” node); the diagram omits the provisional apply-signal pass — Approach governs that detail.
 - CAP-6 (a)(b) only in this story; write-on-change, latch decay, and docs stay later entries.
 
 **Never:**
@@ -46,9 +47,9 @@ context:
 |----------|--------------|---------------------------|----------------|
 | No proposal | `proposed is None` | Do not commit; track with committed ωc | No error |
 | Guard tripped | `tripped=True`, any command / Δωc | Skip commit | No error |
-| Max + ωc↑ | `command >= max`, proposed > current | Skip commit; tracking must use current ωc | No error |
+| Max + ωc↑ | `command >= max`, proposed > current | Skip commit; write-path tracking must use current ωc | No error |
 | Max + ωc↓ | `command >= max`, proposed < current | May commit; tracking may use proposed | No error |
-| Min + ωc↓ | `command <= min`, proposed < current | Skip commit; tracking uses current | No error |
+| Min + ωc↓ | `command <= min`, proposed < current | Skip commit; write-path tracking must use current ωc | No error |
 | Min + ωc↑ | `command <= min`, proposed > current | May commit; tracking may use proposed | No error |
 | Interior | `min < command < max`, not tripped | May commit; tracking may use proposed | No error |
 | Ratchet regression | Repeated saturated upward proposals at max | Applied and committed ωc do not rise across ticks | No error |
@@ -82,6 +83,8 @@ context:
 
 ## Plan Change Log
 
+- 2026-10-17 walkthrough: polish Always — write-path choice cites arch node but Approach governs provisional; Min+ωc↓ matrix says write-path tracking (symmetric with Max+ωc↑).
+- 2026-10-17 walkthrough: human renegotiated frozen Intent — Approach names apply-signal provisional vs write-path; Always allows provisional evaluate; Max+ωc↑ matrix says write-path tracking.
 - 2026-10-17 review: block — skip commit when provisional helper false (no re-eval on final guard). should-fix — ratchet locks write-path applied ωc; latch/WARN only from write guard. nit — Intent says write-path tracking.
 
 ## Review Triage Log
@@ -114,3 +117,13 @@ context:
 **Commands:**
 - `uv run pytest tests/test_hvac_app.py tests/test_ladrc_tuner.py -q` -- expected: all green, including new matrix and ratchet regression
 - `uv run ruff check apps/hvac/hvac_app.py tests/test_hvac_app.py` -- expected: clean
+
+## Code Review
+
+### 2026-10-17
+
+**Code review complete.** 0 `decision-needed`, 1 `patch`, 0 `defer`, 0 rejected.
+
+- [x] [Review][Patch] Inspect lock matches `commit_omega_c` inside `should_commit_omega_c` [tests/test_hvac_app.py:352]
+
+**Rejected:** (none)

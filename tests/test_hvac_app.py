@@ -349,7 +349,10 @@ def test_control_tick_skips_commit_omega_c_when_guard_tripped():
     assert "omega_to_commit = new_omega_c if apply_proposed else None" in post_write
     commit_gate = "if should_commit_omega_c("
     assert commit_gate in post_write
-    assert post_write.index(commit_gate) < post_write.index("commit_omega_c")
+    # Match the tuner call, not the substring inside should_commit_omega_c.
+    commit_call = "_tuner.commit_omega_c"
+    assert commit_call in post_write
+    assert post_write.index(commit_gate) < post_write.index(commit_call)
     # Must not regress to persistence-only gating (guard.tripped alone).
     assert "if new_omega_c is not None and not guard.tripped:" not in src
 
