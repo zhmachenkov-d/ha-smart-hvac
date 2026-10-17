@@ -2,12 +2,15 @@
 
 import inspect
 
+import pytest
+
 from hvac.hvac_app import (
     HvacApp,
     advance_with_tracking_residue,
     format_blow_up_warning,
     guard_u_track,
     latch_after_zone_change,
+    should_commit_omega_c,
 )
 from hvac.ladrc import LadrcState
 from hvac.models import LadrcConfig, LadrcTuneConfig
@@ -337,10 +340,129 @@ def test_control_tick_wires_should_warn_and_latch_out():
 
 
 def test_control_tick_skips_commit_omega_c_when_guard_tripped():
-    """AI-5 / F-R2: persist adapted ωc only on healthy post-write ticks."""
+    """AI-5 / F-R2: persist adapted ωc only via should_commit_omega_c after write."""
     src = inspect.getsource(HvacApp.control_tick)
-    assert "if new_omega_c is not None and not guard.tripped:" in src
-    assert src.index("_write_setpoint(guard.command)") < src.index("commit_omega_c")
+    write_i = src.index("_write_setpoint(guard.command)")
+    # Provisional apply gate before write; commit gate after write.
+    assert src.index("should_commit_omega_c") < write_i
+    post_write = src[write_i:]
+    assert "omega_to_commit = new_omega_c if apply_proposed else None" in post_write
+    commit_gate = "if should_commit_omega_c("
+    assert commit_gate in post_write
+    # Match the tuner call, not the substring inside should_commit_omega_c.
+    commit_call = "_tuner.commit_omega_c"
+    assert commit_call in post_write
+    assert post_write.index(commit_gate) < post_write.index(commit_call)
+    # Must not regress to persistence-only gating (guard.tripped alone).
+    assert "if new_omega_c is not None and not guard.tripped:" not in src
+
+
+@pytest.mark.parametrize(
+    ("proposed", "current", "tripped", "command", "expected"),
+    [
+        (None, 0.05, False, 47.0, False),  # no proposal
+        (0.06, 0.05, True, 47.0, False),  # guard tripped
+        (0.06, 0.05, False, _SETPOINT_MAX, False),  # max + ωc↑
+        (0.04, 0.05, False, _SETPOINT_MAX, True),  # max + ωc↓
+        (0.04, 0.05, False, _SETPOINT_MIN, False),  # min + ωc↓
+        (0.06, 0.05, False, _SETPOINT_MIN, True),  # min + ωc↑
+        (0.06, 0.05, False, 47.0, True),  # interior
+    ],
+)
+def test_should_commit_omega_c_matrix(
+    proposed: float | None,
+    current: float,
+    tripped: bool,
+    command: float,
+    expected: bool,
+) -> None:
+    """CAP-6(a): directional clamp + guard trip matrix."""
+    assert (
+        should_commit_omega_c(
+            proposed,
+            current,
+            guard_tripped=tripped,
+            command=command,
+            setpoint_min=_SETPOINT_MIN,
+            setpoint_max=_SETPOINT_MAX,
+        )
+        is expected
+    )
+
+
+def test_saturated_upward_proposal_does_not_ratchet_applied_or_committed() -> None:
+    """CAP-6(b): Hass-free loop — write-path applied and committed ωc never rise."""
+    config = _config()
+    ladrc = LadrcState()
+    measured = 21.0
+    reference = 22.0
+    zone = "zone_one"
+    ladrc.reset(measured)
+    ladrc.critical_zone = zone
+
+    committed_omega = config.omega_c
+    # Positive u_track + u_ff at max → healthy command clamped at setpoint_max.
+    u_ff = _SETPOINT_MAX
+
+    for step in range(10):
+        proposed = committed_omega * (1.0 + 0.05 * (step + 1))
+        assert proposed > committed_omega
+
+        proposed_cfg = config.with_omega_c(proposed)
+        provisional_u = ladrc.compute_tracking(
+            measured=measured,
+            reference=reference,
+            config=proposed_cfg,
+            critical_zone=zone,
+        )
+        provisional = _run_guard(
+            u_track=provisional_u,
+            u_ff=u_ff,
+            u_track_max=proposed_cfg.u_track_max,
+        )
+        assert provisional.command >= _SETPOINT_MAX
+
+        apply_proposed = should_commit_omega_c(
+            proposed,
+            committed_omega,
+            guard_tripped=provisional.tripped,
+            command=provisional.command,
+            setpoint_min=_SETPOINT_MIN,
+            setpoint_max=_SETPOINT_MAX,
+        )
+        if apply_proposed:
+            write_cfg = proposed_cfg
+            write_guard = provisional
+        else:
+            write_cfg = config.with_omega_c(committed_omega)
+            write_u = ladrc.compute_tracking(
+                measured=measured,
+                reference=reference,
+                config=write_cfg,
+                critical_zone=zone,
+            )
+            write_guard = _run_guard(
+                u_track=write_u,
+                u_ff=u_ff,
+                u_track_max=write_cfg.u_track_max,
+            )
+
+        applied_omega = write_cfg.omega_c
+        assert applied_omega == committed_omega
+        assert applied_omega == config.omega_c
+
+        omega_to_commit = proposed if apply_proposed else None
+        if should_commit_omega_c(
+            omega_to_commit,
+            committed_omega,
+            guard_tripped=write_guard.tripped,
+            command=write_guard.command,
+            setpoint_min=_SETPOINT_MIN,
+            setpoint_max=_SETPOINT_MAX,
+        ):
+            committed_omega = proposed
+
+        assert committed_omega == config.omega_c
 
 
 def test_control_tick_resets_eso_after_successful_write_on_trip():
