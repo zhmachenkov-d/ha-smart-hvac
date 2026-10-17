@@ -2,6 +2,43 @@
 
 <!-- version list -->
 
+## v0.5.1 (2026-10-17)
+
+### Bug Fixes
+
+- **hvac**: Clear steady on latch and once-per-episode blow-up WARN
+  ([`754b30d`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/754b30d0e409546fb74fee2092dfd0e9461d8089))
+
+### Chores
+
+- **bmad**: Add omega-c gate epic retrospective and party C decision
+  ([`3435c63`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/3435c63d01cf0cd4c1d9a28b695e89fe680677af))
+
+- **bmad**: Note PR #36 walkthrough wrap-up in review log
+  ([`57b25bc`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/57b25bc448820ebb20146521b44e47b8615c895b))
+
+- **bmad**: Note PR #39 walkthrough wrap-up in review log
+  ([`02556c5`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/02556c5dcfe554e2420aabef4ea6f62f48ce860c))
+
+- **bmad**: Walkthrough PR #39 and close omega-c gate
+  ([`dcdc8b6`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/dcdc8b6425cba80bae049de44c66f7b3274a0560))
+
+### Documentation
+
+- **omega-c**: Document criterion A guards in ADR and calibration
+  ([`59350ce`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/59350cedc184f4444cc220849538f4d3388ad6b9))
+
+### Refactoring
+
+- **hvac**: Close omega-c gate epic with naming and companion sync
+  ([`15c23bb`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/15c23bb80043fd605de20262346dd3603a293feb))
+
+### Testing
+
+- **hvac**: Harden Package C locks from walkthrough review
+  ([`132f984`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/132f984412824b89243361f326008d49b601ee53))
+
+
 ## v0.5.0 (2026-10-17)
 
 ### Chores
