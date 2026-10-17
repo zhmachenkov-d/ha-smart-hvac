@@ -33,7 +33,7 @@ A Home Assistant operator can install ha-smart-hvac from HACS (custom repository
 
 ## Done when
 
-1. A stranger can add this repo in HACS as AppDaemon, install from a published Release, and find `hvac/` under their AppDaemon apps path.
+1. A stranger can add this repo in HACS as AppDaemon, install from a published Release, and find `ha_smart_hvac/` under their AppDaemon apps path.
 2. README (or linked example) shows concrete `app_dir` for Exclusive Session, Production add-on, and stranger HACS path, including the add-on vs `<config>/appdaemon/apps` mismatch.
 3. Tracked tree and GitHub-served history carry no live house entity IDs from `apps.yaml`.
 4. `hacs.json` + Validate workflow stay green on the default branch; Releases continue to cut for releasing changes on `main`.
@@ -67,3 +67,4 @@ Capability / distribution boundary: AppDaemon HACS packaging and public-repo rea
 - Decision: 2026-10-17 — option 2: one hitl epic for stranger-install verify; initiative Done when #2–#5 treated as already met; #1 owned by epic-hacs-stranger-install-verify.
 - Decision: 2026-10-17 slice+inception approved — epic covers [R4]; one hitl story; Validate PR triage parked; no refactor sweep.
 - Decision: 2026-10-17 — HACS install broken: `apps.yaml.example` under `apps/` stole first contents slot; HACS local path = repo name so package/repo must be valid Python id. Rename package + GitHub repo to `ha_smart_hvac`; move example to repo root.
+- Decision: 2026-10-17 verify 1.1 — Done when #1 package path is `ha_smart_hvac/` (aligned with rename).
