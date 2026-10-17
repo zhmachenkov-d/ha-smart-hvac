@@ -2,7 +2,7 @@
 
 Target: [PR #36](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/36) (`feat/1-3-write-on-change-setpoint` → `main`, commit `7177934`)
 Focus: human review of CAP-3 write-on-change + CAP-6 (c)(d) (story 1.3)
-Current block: closed — walkthrough complete; wrap-up in progress: commit/push + merge PR #36 + mark story 1.3 done
+Current block: closed — walkthrough complete; wrap-up: commit/push + merge PR #36 + mark story 1.3 done + delete feature branch
 
 ## Blocks
 
