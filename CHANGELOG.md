@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.4.0 (2026-10-17)
+
+### Bug Fixes
+
+- **hvac**: Sticky latch only after successful plant write
+  ([`2a6c208`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/2a6c20802b7fab0cbcbeaedab2df34ac82148a04))
+
+### Chores
+
+- **bmad**: Mark story 1.1 directional clamp done
+  ([`210471a`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/210471a2fd37ae95b2a8b1d71aeb1525180ae893))
+
+- **bmad**: Note PR #31 walkthrough wrap-up in review log
+  ([`ed68464`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/ed6846475507cbc080e3213acdf45661c4b5b776))
+
+### Features
+
+- **hvac**: Latch ωc decay and skip adapt while soft-kill held
+  ([`e332fef`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/e332fef20223bb3db0b0264e527f78960599ea37))
+
+
 ## v0.3.0 (2026-10-17)
 
 ### Chores
