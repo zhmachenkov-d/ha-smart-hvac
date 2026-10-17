@@ -1,7 +1,7 @@
 """Tests for Multi-Zone Coordinator."""
 
-from hvac.coordinator import select_critical_zone
-from hvac.models import ThermostatReading, ZoneSnapshot
+from ha_smart_hvac.coordinator import select_critical_zone
+from ha_smart_hvac.models import ThermostatReading, ZoneSnapshot
 
 
 def _zone(

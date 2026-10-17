@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from hvac.config import ConfigError, parse_config
-from hvac.ladrc_tuner import LadrcTuner
-from hvac.models import LadrcConfig, LadrcTuneConfig
+from ha_smart_hvac.config import ConfigError, parse_config
+from ha_smart_hvac.ladrc_tuner import LadrcTuner
+from ha_smart_hvac.models import LadrcConfig, LadrcTuneConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -248,7 +248,7 @@ def test_with_omega_c_preserves_u_track_max() -> None:
 
 def test_parse_apps_yaml_example() -> None:
     """Real example file → package A b0/ωo/ωc and u_track_max=250."""
-    raw = yaml.safe_load((ROOT / "apps" / "apps.yaml.example").read_text())
+    raw = yaml.safe_load((ROOT / "apps.yaml.example").read_text())
     assert isinstance(raw, dict) and "hvac" in raw
     args = dict(raw["hvac"])
     args.pop("module", None)

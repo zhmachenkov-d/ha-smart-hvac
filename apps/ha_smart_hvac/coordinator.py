@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from hvac.models import ControlDecision, ZoneSnapshot
+from ha_smart_hvac.models import ControlDecision, ZoneSnapshot
 
 
 def select_critical_zone(zones: list[ZoneSnapshot]) -> ControlDecision:

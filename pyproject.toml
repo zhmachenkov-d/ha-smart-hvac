@@ -1,5 +1,5 @@
 [project]
-name = "ha-smart-hvac"
+name = "ha_smart_hvac"
 version = "0.5.1"
 license = "MIT"
 requires-python = ">=3.12,<3.13"

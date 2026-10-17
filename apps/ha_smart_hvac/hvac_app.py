@@ -7,12 +7,12 @@ from typing import NamedTuple
 
 import appdaemon.plugins.hass.hassapi as hass
 
-from hvac.config import ConfigError, parse_config
-from hvac.coordinator import select_critical_zone
-from hvac.feedforward import weather_feedforward
-from hvac.ladrc import LadrcState
-from hvac.ladrc_tuner import LadrcTuner
-from hvac.models import (
+from ha_smart_hvac.config import ConfigError, parse_config
+from ha_smart_hvac.coordinator import select_critical_zone
+from ha_smart_hvac.feedforward import weather_feedforward
+from ha_smart_hvac.ladrc import LadrcState
+from ha_smart_hvac.ladrc_tuner import LadrcTuner
+from ha_smart_hvac.models import (
     HvacConfig,
     LadrcConfig,
     ThermostatReading,

@@ -1,6 +1,6 @@
-# ha-smart-hvac
+# ha_smart_hvac
 
-[![CI](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml/badge.svg)](https://github.com/zhmachenkov-d/ha-smart-hvac/actions/workflows/ci.yaml)
+[![CI](https://github.com/zhmachenkov-d/ha_smart_hvac/actions/workflows/ci.yaml/badge.svg)](https://github.com/zhmachenkov-d/ha_smart_hvac/actions/workflows/ci.yaml)
 
 AppDaemon apps for multi-zone OpenTherm HVAC control via Home Assistant.
 
@@ -9,9 +9,9 @@ AppDaemon apps for multi-zone OpenTherm HVAC control via Home Assistant.
 This project ships as a **HACS AppDaemon** app (custom repository only — not in the HACS default store).
 
 1. In Home Assistant, open **HACS** → enable AppDaemon discovery if needed → **Custom repositories**.
-2. Add this repository URL, category **AppDaemon**, and install **ha-smart-hvac**.
+2. Add this repository URL, category **AppDaemon**, and install **ha_smart_hvac**.
 3. Install from a **published GitHub Release** (HACS prefers releases over the default branch alone). After `v0.1.0`, Releases are cut automatically by CI when releasing changes merge to `main`.
-4. HACS downloads the package to the HA config tree under `appdaemon/apps/hvac/` (e.g. `/config/appdaemon/apps/hvac/` on many HAOS installs). If your AppDaemon add-on’s default apps directory is elsewhere (common after add-on v0.15+ under `addon_configs/…`), point `app_dir` at the HACS path so AppDaemon loads the download ([hacs/integration#4442](https://github.com/hacs/integration/issues/4442)):
+4. HACS downloads the package to the HA config tree under `appdaemon/apps/ha_smart_hvac/` (e.g. `/config/appdaemon/apps/ha_smart_hvac/` on many HAOS installs). If your AppDaemon add-on’s default apps directory is elsewhere (common after add-on v0.15+ under `addon_configs/…`), point `app_dir` at the **parent** of that folder so AppDaemon can import the package ([hacs/integration#4442](https://github.com/hacs/integration/issues/4442)):
 
    ```yaml
    appdaemon:
@@ -19,23 +19,23 @@ This project ships as a **HACS AppDaemon** app (custom repository only — not i
      app_dir: /config/appdaemon/apps
    ```
 
-5. Create `apps.yaml` **beside** the downloaded `hvac/` under that `app_dir` (HACS only installs `apps/hvac/`, so `apps/apps.yaml.example` is **not** in the download). Copy the example from the GitHub repo and replace `YOUR_*` placeholders with your entity IDs (never commit live house IDs):
+5. Create `apps.yaml` **beside** the downloaded `ha_smart_hvac/` under that `app_dir` (HACS only installs the package directory under `apps/`; the wiring example is **not** in the download). Copy the example from the GitHub repo and replace `YOUR_*` placeholders with your entity IDs (never commit live house IDs):
 
-   [apps/apps.yaml.example](https://raw.githubusercontent.com/zhmachenkov-d/ha-smart-hvac/main/apps/apps.yaml.example)
+   [apps.yaml.example](https://raw.githubusercontent.com/zhmachenkov-d/ha_smart_hvac/main/apps.yaml.example)
 
-   After wiring, calibrate feedforward and LADRC gains for the house: [docs/house-calibration.md](docs/house-calibration.md).
+   Use `module: ha_smart_hvac` and `class: HvacApp` as in the example. After wiring, calibrate feedforward and LADRC gains for the house: [docs/house-calibration.md](docs/house-calibration.md).
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `apps/hvac/` | HVAC App package (`module: hvac`, `class: HvacApp`) |
+| `apps/ha_smart_hvac/` | HVAC App package (`module: ha_smart_hvac`, `class: HvacApp`) — sole directory under `apps/` (HACS requirement) |
 | `apps/apps.yaml` | Local house entity wiring (**gitignored** — copy from example) |
-| `apps/apps.yaml.example` | Placeholder entity IDs only |
+| `apps.yaml.example` | Placeholder entity IDs only (repo root — not under `apps/`) |
 | `appdaemon/` | Exclusive Session AppDaemon config (`appdaemon.yaml`, secrets) |
 | `docs/house-calibration.md` | How to calibrate wiring, feedforward, and LADRC for a house |
 
-Canonical Python lives at repo-root `apps/hvac/`. Exclusive Session config stays under `appdaemon/` and loads that tree via `app_dir: ../apps` (no symlink).
+Canonical Python lives at repo-root `apps/ha_smart_hvac/`. Exclusive Session config stays under `appdaemon/` and loads that tree via `app_dir: ../apps` (no symlink).
 
 ## Dev Container (Exclusive Session)
 
@@ -51,7 +51,7 @@ Canonical Python lives at repo-root `apps/hvac/`. Exclusive Session config stays
 3. Ensure local wiring exists:
 
    ```bash
-   cp apps/apps.yaml.example apps/apps.yaml
+   cp apps.yaml.example apps/apps.yaml
    # then replace YOUR_* placeholders with your house entity IDs
    ```
 
@@ -88,7 +88,7 @@ appdaemon:
   app_dir: ../apps
 ```
 
-That resolves to `<repo>/apps`, where `hvac/` and your local `apps.yaml` live.
+That resolves to `<repo>/apps`, where `ha_smart_hvac/` and your local `apps.yaml` live.
 
 ### 2. Production AppDaemon add-on (this house)
 
@@ -118,5 +118,4 @@ uv run pytest              # run tests
 uv run ruff check apps tests
 uv run ruff format --check apps tests
 pre-commit install         # optional: run hooks on commit
-pre-commit run --all-files # run hooks manually
 ```

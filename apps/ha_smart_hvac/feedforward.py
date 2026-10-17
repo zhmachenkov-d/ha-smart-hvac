@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from hvac.models import WeatherFeedforwardConfig
+from ha_smart_hvac.models import WeatherFeedforwardConfig
 
 
 def weather_feedforward(outdoor_temp: float, config: WeatherFeedforwardConfig) -> float:

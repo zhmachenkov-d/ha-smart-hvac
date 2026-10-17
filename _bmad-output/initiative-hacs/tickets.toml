@@ -1,0 +1,7 @@
+# Initiative breakdown — build order is table order.
+
+[[epic]]
+id = 1
+slug = "epic-hacs-stranger-install-verify"
+title = "Stranger HACS install verify"
+covers = ["R4"]

@@ -2,8 +2,8 @@
 
 import math
 
-from hvac.ladrc import LadrcState
-from hvac.models import LadrcConfig, LadrcTuneConfig
+from ha_smart_hvac.ladrc import LadrcState
+from ha_smart_hvac.models import LadrcConfig, LadrcTuneConfig
 
 # Locked CAP-5 thermal+C scenario (not example YAML).
 _Y = 21.0

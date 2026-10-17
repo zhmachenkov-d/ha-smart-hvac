@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from hvac.models import LadrcConfig
+from ha_smart_hvac.models import LadrcConfig
 
 # Forward Euler: thermal CAP-5 (ωo=0.03, dt=60) needs 2 substeps —
 # one step: |1−2·dt·ωo|=2.6 > 1; two (h=30): |1−2·h·ωo|=0.8 < 1.

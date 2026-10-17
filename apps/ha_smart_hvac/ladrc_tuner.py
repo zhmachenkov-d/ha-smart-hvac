@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Protocol
 
-from hvac.models import LadrcConfig
+from ha_smart_hvac.models import LadrcConfig
 
 
 class _SensorPublisher(Protocol):

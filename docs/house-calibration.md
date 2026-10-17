@@ -2,7 +2,7 @@
 
 How to calibrate the HVAC App for a specific house. There is no relay/step commissioning procedure in this project ([ADR 0003](adr/0003-online-ladrc-omega-c-auto-tune.md) leaves that out of scope). Calibration is **manual `apps.yaml` tuning** plus **online adaptation of Controller Bandwidth (ωc) only**.
 
-Copy [`apps/apps.yaml.example`](../apps/apps.yaml.example) to `apps.yaml` next to the installed `hvac/` package, then work through the sections below. Never commit live house entity IDs.
+Copy [`apps.yaml.example`](../apps.yaml.example) to `apps.yaml` next to the installed `ha_smart_hvac/` package, then work through the sections below. Never commit live house entity IDs.
 
 Domain terms: [`CONTEXT.md`](../CONTEXT.md). Control decisions: [ADR 0002](adr/0002-ladrc-critical-zone-control.md), [ADR 0003](adr/0003-online-ladrc-omega-c-auto-tune.md).
 
@@ -55,7 +55,7 @@ ladrc:
 
 After a Critical Zone reset, `|u_track| ≈ ωc·|e|/b0`. Example package A keeps cold-start `|e|=2` under the guard (`≈120 < 250`); `|e|=5` may trip. Raise `u_track_max` or lower `ωc` together if you change either.
 
-Forward-Euler ESO (`apps/hvac/ladrc.py`, `_ESO_EULER_SUBSTEPS=2`): stability needs `|1 − 2·h·ωo| < 1` with `h = dt/2`. At `dt=60`, that is **`ωo` below `1/30 ≈ 0.033`**. Do not use the old “~0.05” upper end — it reintroduces divergence the continuous-form change fixed. If you raise `control_interval`, lower `ωo` or expect a code change to derive substeps from `ωo·dt`.
+Forward-Euler ESO (`apps/ha_smart_hvac/ladrc.py`, `_ESO_EULER_SUBSTEPS=2`): stability needs `|1 − 2·h·ωo| < 1` with `h = dt/2`. At `dt=60`, that is **`ωo` below `1/30 ≈ 0.033`**. Do not use the old “~0.05” upper end — it reintroduces divergence the continuous-form change fixed. If you raise `control_interval`, lower `ωo` or expect a code change to derive substeps from `ωo·dt`.
 
 | Parameter | Effect |
 |-----------|--------|

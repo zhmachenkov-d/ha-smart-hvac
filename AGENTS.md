@@ -1,7 +1,7 @@
 <!-- bmad:context -->
 <!-- Verified 2026-10-02 against 243550d. Managed by bmad-project-context; edits inside this block are replaced on refresh. Keep anything you want preserved outside the markers. -->
 
-## ha-smart-hvac
+## ha_smart_hvac
 
 AppDaemon Apps that control multi-zone OpenTherm HVAC through Home Assistant. Python 3.12, uv, AppDaemon 4.5.13. Domain language in `CONTEXT.md`; ADRs in `docs/adr/`; planning output in `_bmad-output/`.
 
@@ -16,7 +16,7 @@ AppDaemon Apps that control multi-zone OpenTherm HVAC through Home Assistant. Py
 
 - Domain terms and avoid-list: `CONTEXT.md`
 - Architecture decisions: `docs/adr/` (0001 Exclusive Session, 0002 LADRC Critical Zone, 0003 ωc auto-tune)
-- App package: `apps/hvac/`; entity wiring: `apps/apps.yaml` (gitignored; start from `apps/apps.yaml.example`)
+- App package: `apps/ha_smart_hvac/`; entity wiring: `apps/apps.yaml` (gitignored; start from `apps.yaml.example` at repo root)
 - Algorithm depth / citations: `knowledge/`
 - In-flight planning artifacts: `_bmad-output/`
 
