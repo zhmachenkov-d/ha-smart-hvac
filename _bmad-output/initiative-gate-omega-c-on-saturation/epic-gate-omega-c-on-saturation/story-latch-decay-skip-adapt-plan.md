@@ -3,7 +3,7 @@ title: 'Latch decay + skip adapt'
 type: 'feature'
 ticket: '2'
 created: '2026-10-17'
-status: 'built'
+status: done
 baseline_revision: 'a05577942e6bea82afd0cc81f0b4f3c0930cb7eb'
 route: 'full'
 route_source: 'auto'
@@ -26,12 +26,13 @@ deferred: []
 
 **Problem:** Once the blow-up soft-kill latch sticks, healthy ticks still call `maybe_adapt` and cannot step ωc down on real `|u_track|`, so recovery stays ops-only.
 
-**Approach:** When latch is already active at tick start, skip `maybe_adapt` entirely. After write-path `u_track` is known, if latch is active and `|u_track| > 0.8·u_track_max` or non-finite, step committed ωc down by tuner `max_rate_fraction` (≥ `omega_c_min`) and persist even when guard trip blocks normal `commit_omega_c`; stop when finite `|u_track| ≤ 0.8·u_track_max`.
+**Approach:** When latch is already active at tick start, skip `maybe_adapt` entirely. After write-path `u_track` is known **and** the plant write succeeds, assign a **sticky** soft-kill latch (`tripped` or prior latch while residue holds)—so the latch stays active in `(0.8·u_track_max, u_track_max]` and clears only when finite `|u_track| ≤ 0.8·u_track_max` (not when `|u|≤u_track_max` alone). While that sticky latch is active and residue holds (`|u_track| > 0.8·u_track_max` or non-finite), step committed ωc down by tuner `max_rate_fraction` (≥ `omega_c_min`) and persist even when guard trip blocks normal `commit_omega_c`. On write failure, leave `_blow_up_latch` unchanged (WARN may still fire before write).
 
 ## Boundaries & Constraints
 
 **Always:**
 - Skip adapt uses latch state at **tick start** (before `maybe_adapt` / zone-change clear).
+- Sticky CAP-4 latch (not `latch_out` alone) only after successful `_write_setpoint`: hold in `(0.8·u_track_max, u_track_max]` so the 0.8 stop band is reachable; fail-write does not mutate latch.
 - Decay uses **actual tick `|u_track|`** (write-path), not `|ωc·e/b0|`; threshold `0.8` is a code constant.
 - Decay step/floor reuse existing `max_rate_fraction` / `omega_c_min`; persist via tuner even when `should_commit_omega_c` would skip.
 - Trip-edge tick may still adapt before the guard; decay may run that same tick once latch is active and residue holds (architecture H→I).
@@ -118,9 +119,9 @@ deferred: []
 
 **Latch-at-start vs post-guard latch.** Skip adapt reads `_blow_up_latch` before `maybe_adapt` (and before `latch_after_zone_change`). After write-path `guard_u_track`, do **not** set `_blow_up_latch = guard.latch_out` alone: that clears as soon as `|u|≤u_track_max` and makes the CAP-4 stop band unreachable.
 
-**Sticky CAP-4 latch (locked).** Let `latch_in` be `_blow_up_latch` after zone-change clear (the value passed into `guard_u_track`). After the write-path guard returns, set:
+**Sticky CAP-4 latch (locked).** Let `latch_in` be `_blow_up_latch` after zone-change clear (the value passed into `guard_u_track`). After **successful** `_write_setpoint` (not merely after the write-path guard returns), set:
 `_blow_up_latch = guard.tripped or (latch_in and latch_decay_residue_holds(u_track, u_track_max))`.
-Trip-edge (`latch_in` False, `tripped` True) latches and may decay the same tick. While residue holds above the 0.8 band, latch stays True even if not currently tripped. When finite `|u|≤0.8·u_track_max`, latch clears. Keep using `guard.should_warn` / `guard.tripped` for WARN and ESO reset — do not change soft-kill command selection.
+Fail-write leaves `_blow_up_latch` unchanged. WARN may still fire before write. Trip-edge (`latch_in` False, `tripped` True) latches and may decay the same tick after a successful write. While residue holds above the 0.8 band, latch stays True even if not currently tripped. When finite `|u|≤0.8·u_track_max`, latch clears. Keep using `guard.should_warn` / `guard.tripped` for WARN and ESO reset — do not change soft-kill command selection.
 
 **Decay vs normal commit.** Architecture: decay branch ends the tick without `should_commit_omega_c`. Do not also commit a proposed ωc on a decay tick. Decay reads `_blow_up_latch` after the sticky assignment above.
 

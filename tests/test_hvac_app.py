@@ -334,15 +334,14 @@ def test_control_tick_trip_info_uses_guarded_marker():
 
 
 def test_control_tick_wires_should_warn_and_sticky_latch():
-    """AI-7 / F-V3 + CAP-4: sticky latch after write-path guard; WARN before write."""
+    """AI-7 / F-V3 + CAP-4: WARN before write; sticky only after successful write."""
     src = inspect.getsource(HvacApp.control_tick)
     assert "sticky_blow_up_latch(" in src
     assert "guard.latch_out" not in src
     assert "if guard.should_warn:" in src
-    assert src.index("sticky_blow_up_latch(") < src.index("if guard.should_warn:")
-    assert src.index("if guard.should_warn:") < src.index(
-        "_write_setpoint(guard.command)"
-    )
+    write_i = src.index("_write_setpoint(guard.command)")
+    assert src.index("if guard.should_warn:") < write_i
+    assert write_i < src.index("sticky_blow_up_latch(")
 
 
 def test_control_tick_skips_commit_omega_c_when_guard_tripped():
@@ -581,8 +580,12 @@ def _mirror_decay_tick(
     latch: bool,
     u_track: float,
     u_ff: float = 40.0,
+    write_ok: bool = True,
 ) -> bool:
-    """Hass-free mirror of control_tick sticky latch + decay commit branch."""
+    """Hass-free mirror of control_tick sticky+decay after a plant write attempt.
+
+    When write_ok is False, matches fail-write early return: latch and ωc unchanged.
+    """
     latch_in = latch
     guard = guard_u_track(
         u_track,
@@ -592,6 +595,8 @@ def _mirror_decay_tick(
         _SETPOINT_MAX,
         latch_in,
     )
+    if not write_ok:
+        return latch_in
     latch_out = sticky_blow_up_latch(
         latch_in, guard.tripped, u_track, config.u_track_max
     )
@@ -729,3 +734,25 @@ def test_single_decay_step_matches_max_rate_fraction(tmp_path: Path) -> None:
     assert tuner.omega_c == pytest.approx(expected)
     persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
     assert persisted == pytest.approx(expected)
+
+
+def test_fail_write_leaves_latch_and_omega_c_unchanged(tmp_path: Path) -> None:
+    """Fail-write early return: sticky/decay must not run (sticky-after-write)."""
+    config = _decay_config(omega_c=0.10)
+    state_path = tmp_path / "ladrc_tune_state.json"
+    tuner = LadrcTuner(config, state_path)
+
+    # Latched + gray-band residue would decay if write succeeded.
+    latch = _mirror_decay_tick(
+        tuner=tuner, config=config, latch=True, u_track=90.0, write_ok=False
+    )
+    assert latch is True
+    assert tuner.omega_c == pytest.approx(0.10)
+
+    # Trip-edge would sticky+decay on success; fail keeps latch False.
+    latch = _mirror_decay_tick(
+        tuner=tuner, config=config, latch=False, u_track=150.0, write_ok=False
+    )
+    assert latch is False
+    assert tuner.omega_c == pytest.approx(0.10)
+    assert not state_path.is_file()

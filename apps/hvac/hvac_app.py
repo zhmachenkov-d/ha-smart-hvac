@@ -300,13 +300,6 @@ class HvacApp(hass.Hass):
             )
             effective_ladrc = committed_ladrc
 
-        # Sticky CAP-4 latch from write-path guard (not latch_out alone).
-        self._blow_up_latch = sticky_blow_up_latch(
-            latch_in,
-            guard.tripped,
-            u_track,
-            effective_ladrc.u_track_max,
-        )
         if guard.should_warn:
             self.log(
                 format_blow_up_warning(
@@ -319,6 +312,13 @@ class HvacApp(hass.Hass):
             )
         if not self._write_setpoint(guard.command):
             return
+        # Sticky CAP-4 latch only after successful plant write (not latch_out alone).
+        self._blow_up_latch = sticky_blow_up_latch(
+            latch_in,
+            guard.tripped,
+            u_track,
+            effective_ladrc.u_track_max,
+        )
         # AI-6: reset ESO only after successful plant write (not inside guard).
         if guard.tripped:
             self._ladrc.reset(decision.measured)
