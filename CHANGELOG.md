@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v0.3.0 (2026-10-17)
+
+### Chores
+
+- **bmad**: Add gate-ωc-on-saturation initiative artifacts
+  ([`cd3c16f`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/cd3c16fdb2d60fa2a8f9a472a0977546edefa40e))
+
+- **hvac**: Harden inspect lock and capture PR #31 walkthrough
+  ([`dc141b7`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/dc141b7d103c6869e3cc092567ec63a5515b12e1))
+
+### Features
+
+- **hvac**: Gate ωc apply/commit on directional clamp
+  ([`2868763`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/2868763d0f7191f63d5bc28bc4807aa73b6b7f1d))
+
+
 ## v0.2.5 (2026-10-16)
 
 ### Bug Fixes
