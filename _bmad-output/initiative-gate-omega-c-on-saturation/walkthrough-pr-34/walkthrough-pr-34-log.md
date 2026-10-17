@@ -291,3 +291,12 @@ Session: unavailable · Timestamp: 2026-10-17T04:39:00+03:00
 - Result: In progress.
 - Evidence: user message
 - Open: Complete git/gh steps
+
+## 33 — wrap-up — complete
+
+Session: unavailable · Timestamp: 2026-10-17T04:40:00+03:00
+
+- Action: Pushed 2a6c208; CI green; merged PR #34; deleted feat/1-2-latch-decay-skip-adapt; story plan status done on main.
+- Result: Wrap-up finished. Next epic entry is Story 3 write-on-change.
+- Evidence: https://github.com/zhmachenkov-d/ha-smart-hvac/pull/34 ; merge 7eac624; story status done
+- Open: none
