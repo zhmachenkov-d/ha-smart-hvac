@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.5.0 (2026-10-17)
+
+### Chores
+
+- **bmad**: Add PR #36 walkthrough and mark story 1.3 done
+  ([`62f77ae`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/62f77ae94f343640499a3a3bc55ac9cf30a17dad))
+
+### Features
+
+- **hvac**: Skip redundant plant setpoint writes
+  ([`7177934`](https://github.com/zhmachenkov-d/ha-smart-hvac/commit/717793406de2cb1c41d0e945151bb7ca77697529))
+
+
 ## v0.4.0 (2026-10-17)
 
 ### Bug Fixes
