@@ -130,6 +130,37 @@ def should_commit_omega_c(
     return True
 
 
+# CAP-4: latch-decay stop band as a fraction of u_track_max (not a yaml knob).
+LATCH_DECAY_U_TRACK_FRACTION = 0.8
+
+
+def latch_decay_residue_holds(u_track: float, u_track_max: float) -> bool:
+    """True when latched decay should continue (high or non-finite |u_track|)."""
+    if not math.isfinite(u_track):
+        return True
+    return abs(u_track) > LATCH_DECAY_U_TRACK_FRACTION * u_track_max
+
+
+def next_decayed_omega_c(
+    current: float,
+    max_rate_fraction: float,
+    omega_c_min: float,
+) -> float:
+    """One max_rate_fraction step down, floored at omega_c_min."""
+    step = max_rate_fraction * current
+    return max(omega_c_min, current - step)
+
+
+def sticky_blow_up_latch(
+    latch_in: bool,
+    tripped: bool,
+    u_track: float,
+    u_track_max: float,
+) -> bool:
+    """CAP-4 sticky soft-kill: hold while residue is above the 0.8 band."""
+    return tripped or (latch_in and latch_decay_residue_holds(u_track, u_track_max))
+
+
 class HvacApp(hass.Hass):
     def initialize(self) -> None:
         try:
@@ -180,13 +211,18 @@ class HvacApp(hass.Hass):
             )
             return
 
+        # CAP-4: skip adapt when latch already active at tick start.
+        latch_at_start = self._blow_up_latch
         tracking_error = decision.reference - self._ladrc.z1
-        new_omega_c = self._tuner.maybe_adapt(
-            tracking_error,
-            decision.critical_zone,
-            decision.has_demand,
-            apply=False,
-        )
+        if latch_at_start:
+            new_omega_c = None
+        else:
+            new_omega_c = self._tuner.maybe_adapt(
+                tracking_error,
+                decision.critical_zone,
+                decision.has_demand,
+                apply=False,
+            )
         current_omega_c = self._tuner.omega_c
         committed_ladrc = config.ladrc.with_omega_c(current_omega_c)
 
@@ -197,6 +233,8 @@ class HvacApp(hass.Hass):
             decision.critical_zone,
             self._blow_up_latch,
         )
+        # latch_in for sticky CAP-4 (same value passed to the write-path guard).
+        latch_in = self._blow_up_latch
 
         # Strict apply: provisional track+guard with proposed ωc decides apply;
         # blocked proposals never enter write-path tracking (CAP-2).
@@ -215,7 +253,7 @@ class HvacApp(hass.Hass):
                 proposed_ladrc.u_track_max,
                 config.setpoint_min,
                 config.setpoint_max,
-                self._blow_up_latch,
+                latch_in,
             )
             apply_proposed = should_commit_omega_c(
                 new_omega_c,
@@ -242,7 +280,7 @@ class HvacApp(hass.Hass):
                     committed_ladrc.u_track_max,
                     config.setpoint_min,
                     config.setpoint_max,
-                    self._blow_up_latch,
+                    latch_in,
                 )
                 effective_ladrc = committed_ladrc
         else:
@@ -258,12 +296,10 @@ class HvacApp(hass.Hass):
                 committed_ladrc.u_track_max,
                 config.setpoint_min,
                 config.setpoint_max,
-                self._blow_up_latch,
+                latch_in,
             )
             effective_ladrc = committed_ladrc
 
-        # Latch / WARN only from the guard chosen for write.
-        self._blow_up_latch = guard.latch_out
         if guard.should_warn:
             self.log(
                 format_blow_up_warning(
@@ -276,6 +312,13 @@ class HvacApp(hass.Hass):
             )
         if not self._write_setpoint(guard.command):
             return
+        # Sticky CAP-4 latch only after successful plant write (not latch_out alone).
+        self._blow_up_latch = sticky_blow_up_latch(
+            latch_in,
+            guard.tripped,
+            u_track,
+            effective_ladrc.u_track_max,
+        )
         # AI-6: reset ESO only after successful plant write (not inside guard).
         if guard.tripped:
             self._ladrc.reset(decision.measured)
@@ -287,19 +330,31 @@ class HvacApp(hass.Hass):
             u_ff,
             effective_ladrc,
         )
-        # Commit only on applied proposals via helper on the write-path guard.
-        # Blocked apply passes None so a final interior command cannot resurrect.
-        omega_to_commit = new_omega_c if apply_proposed else None
-        if should_commit_omega_c(
-            omega_to_commit,
-            current_omega_c,
-            guard_tripped=guard.tripped,
-            command=guard.command,
-            setpoint_min=config.setpoint_min,
-            setpoint_max=config.setpoint_max,
+        # CAP-4 decay persist (even when guard trip blocks normal commit).
+        if self._blow_up_latch and latch_decay_residue_holds(
+            u_track, effective_ladrc.u_track_max
         ):
-            assert omega_to_commit is not None
-            self._tuner.commit_omega_c(omega_to_commit)
+            self._tuner.commit_omega_c(
+                next_decayed_omega_c(
+                    current_omega_c,
+                    effective_ladrc.tune.max_rate_fraction,
+                    effective_ladrc.omega_c_min,
+                )
+            )
+        else:
+            # Commit only on applied proposals via helper on the write-path guard.
+            # Blocked apply passes None so a final interior command cannot resurrect.
+            omega_to_commit = new_omega_c if apply_proposed else None
+            if should_commit_omega_c(
+                omega_to_commit,
+                current_omega_c,
+                guard_tripped=guard.tripped,
+                command=guard.command,
+                setpoint_min=config.setpoint_min,
+                setpoint_max=config.setpoint_max,
+            ):
+                assert omega_to_commit is not None
+                self._tuner.commit_omega_c(omega_to_commit)
         self._tuner.publish_sensor(self)
         if guard.tripped:
             self.log(
