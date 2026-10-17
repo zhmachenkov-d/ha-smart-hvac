@@ -10,6 +10,7 @@ assignee: ""
 risk: medium
 estimate: ""
 estimate_basis: ""
+status: done
 ---
 
 # Gate ωc on saturation

@@ -1,13 +1,3 @@
 # Deferred work — initiative-gate-omega-c-on-saturation
 
-## Deferred from: walkthrough PR #31 (2026-10-17)
-
-- source_plan: `_bmad-output/initiative-gate-omega-c-on-saturation/epic-gate-omega-c-on-saturation/story-directional-clamp-strict-apply-plan.md`
-  summary: Sync companion CAP-2 wording and architecture flowchart with renegotiated Intent (provisional apply-signal vs write-path).
-  evidence: `control-tick-behaviors.md` CAP-2 still forbids any `with_omega_c(proposed)` for the tick’s `compute_tracking`; `architecture-diagrams.md` omits the provisional pass. Frozen Intent (walkthrough renegotiate) supersedes for Story 1; docs should catch up in CAP-5 / later entry.
-
-## Deferred from: walkthrough PR #34 (2026-10-17)
-
-- source_plan: `_bmad-output/initiative-gate-omega-c-on-saturation/epic-gate-omega-c-on-saturation/story-latch-decay-skip-adapt-plan.md`
-  summary: Sync companion CAP-4 wording (and architecture if needed) with renegotiated Intent — sticky soft-kill hold in `(0.8·u_track_max, u_track_max]`, sticky assignment only after successful `_write_setpoint`.
-  evidence: `control-tick-behaviors.md` CAP-4 omits sticky latch and sticky-after-write; plan Intent (walkthrough renegotiate) supersedes for Story 1.2; docs should catch up in CAP-5 / later entry.
+No open deferred companion items. CAP-2 (PR #31) and CAP-4 sticky (PR #34) wording synced in the refactor sweep.

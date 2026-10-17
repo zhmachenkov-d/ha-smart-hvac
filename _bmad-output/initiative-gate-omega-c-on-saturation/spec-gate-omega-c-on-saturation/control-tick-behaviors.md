@@ -19,13 +19,12 @@ Full freeze on any SWT clamp is out of scope.
 
 ## Strict apply (CAP-2)
 
-On a tick where the directional clamp (or guard trip) would block commit of a proposed increase/decrease:
+On a tick with a proposed ωc, directional clamp and guard trip decide whether that proposal may enter write-path tracking and later persist:
 
-1. Do **not** call `config.ladrc.with_omega_c(proposed)` for that tick’s `compute_tracking`.
-2. Tracking / guard / write use the **current committed** ωc.
-3. Proposed ωc is discarded for both apply and persistence on that tick.
-
-Gate-only-on-persistence (apply proposed, skip commit) is rejected — it reopens the one-tick ratchet.
+1. May run a **provisional** track+guard with `with_omega_c(proposed)` solely as the apply-signal (to evaluate `should_apply_omega_c`).
+2. If blocked: discard provisional; **write-path** track/guard/write/advance use **committed** ωc; do **not** re-evaluate apply/commit on the final guard.
+3. If allowed: reuse provisional `u_track`/guard for write-path (no second track); persist only when `apply_proposed` after a successful write (outside decay).
+4. Gate-only-on-persistence (apply proposed, skip commit) remains rejected — it reopens the one-tick ratchet.
 
 ## Write-on-change (CAP-3)
 
@@ -50,5 +49,11 @@ While the blow-up soft-kill latch is **already active at tick start**:
 6. `0.8` is a fixed code constant — not a yaml knob. Step/floor reuse existing tuner config.
 
 On the trip-edge tick (latch was inactive at start), adapt may still have proposed before the guard; commit remains skipped by guard trip; decay applies from that tick onward when the residue condition holds.
+
+Soft-kill latch (sticky CAP-4):
+
+- Soft-kill latch assigned only **after successful `_write_setpoint`** via sticky: `tripped ∨ (latch_in ∧ residue_holds)` where residue is `|u| > 0.8·u_track_max` or non-finite.
+- Latch **holds** while residue is in `(0.8·u_track_max, u_track_max]` (even if not currently tripped); clears when finite `|u| ≤ 0.8·u_track_max`.
+- On write failure, leave `_blow_up_latch` unchanged.
 
 Rejected as sufficient recovery alone: one step on trip edge (R1), hard reset to `config.omega_c` (R3), one-shot safe-ωc jump (R4).
