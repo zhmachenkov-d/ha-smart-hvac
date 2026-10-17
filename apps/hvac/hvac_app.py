@@ -451,12 +451,15 @@ class HvacApp(hass.Hass):
 
     def _write_setpoint(self, value: float) -> bool:
         entity_id = self._config.plant_setpoint
-        if self.get_state(entity_id) in (None, "unavailable", "unknown"):
+        current = self._read_float(entity_id)
+        if current is None:
             self.log(
                 f"Plant setpoint unavailable: {entity_id}",
                 level="WARNING",
             )
             return False
+        if current == value:
+            return True
         self.call_service(
             "number/set_value",
             entity_id=entity_id,

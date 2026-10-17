@@ -3,6 +3,8 @@
 import inspect
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -756,3 +758,59 @@ def test_fail_write_leaves_latch_and_omega_c_unchanged(tmp_path: Path) -> None:
     assert latch is False
     assert tuner.omega_c == pytest.approx(0.10)
     assert not state_path.is_file()
+
+
+# --- CAP-6 (c)(d): write-on-change vs fail-closed ---
+
+_PLANT_SETPOINT = "number.plant_setpoint"
+
+
+def _write_stub(raw_state: object) -> HvacApp:
+    """Minimal Hass surface for HvacApp._write_setpoint / _read_float."""
+    app = object.__new__(HvacApp)
+    app._config = SimpleNamespace(plant_setpoint=_PLANT_SETPOINT)
+    app.get_state = MagicMock(return_value=raw_state)
+    app.call_service = MagicMock()
+    app.log = MagicMock()
+    return app
+
+
+@pytest.mark.parametrize(
+    "raw_state",
+    [42.0, "42.0", 42],
+)
+def test_write_setpoint_skips_set_value_when_entity_float_equals(raw_state):
+    """CAP-6(c): identical entity float skips set_value; returns success."""
+    app = _write_stub(raw_state)
+
+    ok = HvacApp._write_setpoint(app, 42.0)
+
+    assert ok is True
+    app.call_service.assert_not_called()
+
+
+def test_write_setpoint_calls_set_value_when_entity_float_differs():
+    app = _write_stub(40.0)
+
+    ok = HvacApp._write_setpoint(app, 42.0)
+
+    assert ok is True
+    app.call_service.assert_called_once_with(
+        "number/set_value",
+        entity_id=_PLANT_SETPOINT,
+        value=42.0,
+    )
+
+
+@pytest.mark.parametrize(
+    "raw_state",
+    [None, "unavailable", "unknown", "not-a-float", object()],
+)
+def test_write_setpoint_fail_closed_when_entity_unreadable(raw_state):
+    """CAP-6(d): unreadable/unparseable → no set_value, false (tick abort)."""
+    app = _write_stub(raw_state)
+
+    ok = HvacApp._write_setpoint(app, 42.0)
+
+    assert ok is False
+    app.call_service.assert_not_called()
