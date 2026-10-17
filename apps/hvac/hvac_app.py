@@ -171,6 +171,7 @@ class HvacApp(hass.Hass):
 
         self._ladrc = LadrcState()
         self._blow_up_latch = False
+        self._blow_up_warned = False
         tune_state_path = self.app_dir / self._config.tune_state_path
         self._tuner = LadrcTuner(self._config.ladrc, tune_state_path)
         self.run_every(
@@ -204,6 +205,7 @@ class HvacApp(hass.Hass):
             self._ladrc.clear()
             self._tuner.clear_steady()
             self._blow_up_latch = False
+            self._blow_up_warned = False
             self._write_setpoint(0.0)
             self.log(
                 f"No heating demand (max zone error {decision.zone_error:.2f} °C); "
@@ -215,6 +217,7 @@ class HvacApp(hass.Hass):
         latch_at_start = self._blow_up_latch
         tracking_error = decision.reference - self._ladrc.z1
         if latch_at_start:
+            self._tuner.clear_steady()
             new_omega_c = None
         else:
             new_omega_c = self._tuner.maybe_adapt(
@@ -280,7 +283,7 @@ class HvacApp(hass.Hass):
             u_track, guard = track_and_guard(committed_ladrc, latch=latch_in)
             effective_ladrc = committed_ladrc
 
-        if guard.should_warn:
+        if guard.should_warn and not self._blow_up_warned:
             self.log(
                 format_blow_up_warning(
                     guard.reason or "unknown",
@@ -290,6 +293,7 @@ class HvacApp(hass.Hass):
                 ),
                 level="WARNING",
             )
+            self._blow_up_warned = True
         if not self._write_setpoint(guard.command):
             return
         # Sticky CAP-4 latch only after successful plant write (not latch_out alone).
@@ -299,6 +303,8 @@ class HvacApp(hass.Hass):
             u_track,
             effective_ladrc.u_track_max,
         )
+        if not self._blow_up_latch:
+            self._blow_up_warned = False
         # AI-6: reset ESO only after successful plant write (not inside guard).
         if guard.tripped:
             self._ladrc.reset(decision.measured)
@@ -347,12 +353,14 @@ class HvacApp(hass.Hass):
         self._ladrc.clear()
         self._tuner.clear_steady()
         self._blow_up_latch = False
+        self._blow_up_warned = False
         self.log(message, level="WARNING")
 
     def _go_idle(self, message: str) -> None:
         self._ladrc.clear()
         self._tuner.clear_steady()
         self._blow_up_latch = False
+        self._blow_up_warned = False
         self._write_setpoint(0.0)
         self.log(message, level="WARNING")
 

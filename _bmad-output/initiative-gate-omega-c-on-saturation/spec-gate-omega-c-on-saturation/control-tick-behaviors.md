@@ -41,7 +41,7 @@ Baseline for equality is entity state, not a last-written cache. Equality-skip m
 
 While the blow-up soft-kill latch is **already active at tick start**:
 
-1. **Skip `maybe_adapt` entirely** — no propose, no propose-then-override.
+1. **Skip `maybe_adapt` entirely** — no propose, no propose-then-override. Also call `clear_steady()` on `latch_at_start` so a warm steady counter cannot propose upward ωc on the first unlatched tick after decay.
 2. After `u_track` for the tick is known: if `|u_track| > 0.8 · u_track_max` **or** `u_track` is non-finite → step committed ωc down by existing tuner `max_rate_fraction`, clamp to `≥ omega_c_min`, **persist**.
 3. Stop decaying when `u_track` is finite and `|u_track| ≤ 0.8 · u_track_max` (still skip adapt while latch remains active).
 4. This persist path runs even though normal `commit_omega_c` is skipped on guard trip.
@@ -55,5 +55,10 @@ Soft-kill latch (sticky CAP-4):
 - Soft-kill latch assigned only **after successful `_write_setpoint`** via sticky: `tripped ∨ (latch_in ∧ residue_holds)` where residue is `|u| > 0.8·u_track_max` or non-finite.
 - Latch **holds** while residue is in `(0.8·u_track_max, u_track_max]` (even if not currently tripped); clears when finite `|u| ≤ 0.8·u_track_max`.
 - On write failure, leave `_blow_up_latch` unchanged.
+
+Episode WARN (app-level, independent of sticky latch):
+
+- Gate WARNING with `guard.should_warn and not self._blow_up_warned`; set `_blow_up_warned` on emit. Sticky latch + decay + ESO reset remain after successful write only — do not set `_blow_up_latch` on fail-write to suppress WARN.
+- Clear `_blow_up_warned` on every successful demand tick that ends with `_blow_up_latch` False, and on `_hands_off` / `_go_idle` / no-demand (same paths that clear the latch). Never clear on fail-write early-return.
 
 Rejected as sufficient recovery alone: one step on trip edge (R1), hard reset to `config.omega_c` (R3), one-shot safe-ωc jump (R4).
