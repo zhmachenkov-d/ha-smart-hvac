@@ -346,7 +346,7 @@ def test_control_tick_wires_should_warn_and_sticky_latch():
     assert write_i < src.index("sticky_blow_up_latch(")
 
 
-def test_control_tick_skips_commit_omega_c_when_guard_tripped():
+def test_control_tick_persists_omega_c_via_apply_proposed_after_write():
     """AI-5 / F-R2: persist adapted ωc only via apply_proposed after write."""
     src = inspect.getsource(HvacApp.control_tick)
     write_i = src.index("_write_setpoint(guard.command)")

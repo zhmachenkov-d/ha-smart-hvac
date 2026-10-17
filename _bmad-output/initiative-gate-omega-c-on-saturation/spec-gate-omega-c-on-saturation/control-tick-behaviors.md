@@ -19,7 +19,7 @@ Full freeze on any SWT clamp is out of scope.
 
 ## Strict apply (CAP-2)
 
-On a tick where the directional clamp (or guard trip) would block commit of a proposed increase/decrease:
+On a tick with a proposed ωc, directional clamp and guard trip decide whether that proposal may enter write-path tracking and later persist:
 
 1. May run a **provisional** track+guard with `with_omega_c(proposed)` solely as the apply-signal (to evaluate `should_apply_omega_c`).
 2. If blocked: discard provisional; **write-path** track/guard/write/advance use **committed** ωc; do **not** re-evaluate apply/commit on the final guard.

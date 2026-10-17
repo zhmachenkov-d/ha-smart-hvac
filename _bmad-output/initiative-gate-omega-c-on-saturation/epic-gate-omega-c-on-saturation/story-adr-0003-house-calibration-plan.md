@@ -3,7 +3,7 @@ title: 'ADR 0003 + house-calibration'
 type: 'chore'
 ticket: '4'
 created: '2026-10-17'
-status: 'built'
+status: done
 baseline_revision: 'fdfc03b4a42138ca0190b0aab06561f012780867'
 route: 'oneshot'
 route_source: 'auto'
