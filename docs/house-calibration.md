@@ -69,6 +69,8 @@ Neither `b0` nor `ωo` is adapted online.
 
 When Plant Management is on and there is Heating Demand, LADRC Auto-Tune slowly adjusts **ωc** from sustained Critical Zone tracking error (`reference − z₁`), inside `[omega_c_min, omega_c_max]`, with deadband, rate limit, and freeze on Critical Zone switch ([ADR 0003](adr/0003-online-ladrc-omega-c-auto-tune.md)). Adapted ωc is persisted in `ladrc_tune_state.json` under the AppDaemon app directory.
 
+Saturation and soft-kill recovery follow **criterion A** (not headroom-only full freeze): upward ωc commits are skipped when the tick’s Set Water Temperature command is at `setpoint_max` and downward at `setpoint_min` (relieving moves allowed); a blocked proposal is not applied to tracking that tick. When the blow-up latch is already active at tick start, adapt is skipped; while the latch is held after a successful plant write, ωc may step down by `max_rate_fraction × ωc` on real `|u_track|` above `0.8 · u_track_max` until residue leaves that band — not ops-reset-only. Identical Set Water Temperature values skip HA writes; unreadable plant state aborts the tick (fail-closed).
+
 Weather Feedforward, `b0`, and `ωo` stay manual.
 
 ## 6. Safe order on a live house

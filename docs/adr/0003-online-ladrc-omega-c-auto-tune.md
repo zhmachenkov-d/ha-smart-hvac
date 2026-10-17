@@ -16,6 +16,10 @@ Zone Error uses raw zone sensor temperature. LADRC tracks against the ESO estima
 
 Adaptation runs only when there is Heating Demand, the Critical Zone has been stable for `min_steady_ticks`, `|tracking error| ≥ deadband`, and the per-tick change is clamped to `max_rate_fraction × ωc` and to `[omega_c_min, omega_c_max]`. On Critical Zone switch the tuner freezes for that tick and resets its steady counter (ESO reset is handled separately per ADR 0002).
 
+Commit is also directionally gated against plant saturation under **criterion A** (stop soft-kill after sustained underheat — not “adapt only with actuation headroom”): skip committing an upward ωc when the tick’s Set Water Temperature command is already at `setpoint_max`, and a downward ωc at `setpoint_min`; relieving moves still commit; a blow-up guard trip still blocks normal commit. When commit is blocked, that tick’s tracking uses the current committed ωc — the blocked proposal must not enter the control law. This is not a full freeze whenever Set Water Temperature sits at either clamp.
+
+While the blow-up soft-kill latch is already active at tick start, `maybe_adapt` is skipped for the whole tick. Separately, whenever the latch is held after a successful plant write (including the trip-edge tick) and `|u_track| > 0.8 · u_track_max` (or non-finite), committed ωc steps down by `max_rate_fraction × ωc`, floored at `omega_c_min`, and persists until finite `|u_track|` leaves that band — recovery is not ops-reset-only. Plant Set Water Temperature writes are write-on-change: skip `number/set_value` when the entity float already equals the desired value; unreadable or unparseable entity state stays fail-closed (abort the tick).
+
 ## Persistence
 
 Adapted ωc is stored in `ladrc_tune_state.json` under the AppDaemon app directory. Steady-tick state is not persisted.
