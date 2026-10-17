@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 
 from hvac.config import parse_config
+from hvac.feedforward import weather_feedforward
 from hvac.hvac_app import (
     LATCH_DECAY_U_TRACK_FRACTION,
     HvacApp,
@@ -1101,6 +1102,75 @@ def test_idle_paths_clear_blow_up_warned(tmp_path: Path) -> None:
     app.control_tick({})
     assert app._blow_up_warned is False
     assert app._blow_up_latch is False
+
+
+def test_control_tick_multi_tick_latched_decay_persists(tmp_path: Path) -> None:
+    """Deferred Q5: ≥3 latched demand ticks strictly decrease ωc; JSON/reload match."""
+    app = _tick_app(
+        tmp_path,
+        omega_c=0.10,
+        u_track_max=50.0,
+        zone_temp=15.0,
+        setpoint=22.0,
+        outdoor=0.0,
+        blow_up_latch=True,
+    )
+    state_path = tmp_path / app._config.tune_state_path
+
+    for _ in range(3):
+        before = app._tuner.omega_c
+        app.control_tick({})
+        assert app._blow_up_latch is True
+        assert app._tuner.omega_c < before
+
+    final = app._tuner.omega_c
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))["omega_c"]
+    assert persisted == pytest.approx(final)
+    reloaded = LadrcTuner(app._config.ladrc, state_path)
+    assert reloaded.omega_c == pytest.approx(final)
+
+
+def test_control_tick_equal_setpoint_skips_set_value_still_sticky_decays(
+    tmp_path: Path,
+) -> None:
+    """Deferred Q5: plant==clamp(u_ff) skips set_value; sticky+decay still run."""
+    config = parse_config(_tick_args(omega_c=0.10, u_track_max=50.0))
+    desired = max(
+        config.setpoint_min,
+        min(
+            config.setpoint_max,
+            weather_feedforward(0.0, config.weather_feedforward),
+        ),
+    )
+    assert desired == pytest.approx(49.0)
+
+    app = _tick_app(
+        tmp_path,
+        omega_c=0.10,
+        u_track_max=50.0,
+        zone_temp=15.0,
+        setpoint=22.0,
+        outdoor=0.0,
+        plant_setpoint=desired,
+        blow_up_latch=False,
+    )
+    omega_before = app._tuner.omega_c
+    expected = next_decayed_omega_c(
+        omega_before,
+        app._config.ladrc.tune.max_rate_fraction,
+        app._config.ladrc.omega_c_min,
+    )
+
+    app.control_tick({})
+
+    set_value_calls = [
+        c
+        for c in app.call_service.call_args_list
+        if c.args and c.args[0] == "number/set_value"
+    ]
+    assert set_value_calls == []
+    assert app._blow_up_latch is True
+    assert app._tuner.omega_c == pytest.approx(expected)
 
 
 # --- CAP-6 (c)(d): write-on-change vs fail-closed ---
