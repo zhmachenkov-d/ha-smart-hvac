@@ -3,7 +3,7 @@ title: 'Write-on-change setpoint'
 type: 'feature'
 ticket: '3'
 created: '2026-10-17'
-status: 'built'
+status: done
 baseline_revision: '0082f93d8920c632c82341945093de9df590d7c0'
 route: 'oneshot'
 route_source: 'auto'
