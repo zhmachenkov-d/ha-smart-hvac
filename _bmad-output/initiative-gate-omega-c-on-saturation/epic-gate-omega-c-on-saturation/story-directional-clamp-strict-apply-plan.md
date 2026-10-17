@@ -3,7 +3,7 @@ title: 'Directional clamp + strict apply'
 type: 'feature'
 ticket: '1'
 created: '2026-10-16'
-status: 'built'
+status: done
 baseline_revision: '8ad563afd6d354c0e492995d631b10c71b6daff1'
 route: 'full'
 route_source: 'auto'
