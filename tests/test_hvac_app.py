@@ -4,7 +4,7 @@ import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -894,6 +894,44 @@ def test_control_tick_post_latch_clear_steady_no_upward_rebound(tmp_path: Path) 
     assert app._tuner._steady_ticks == 1  # clear_steady prevented hot rebound propose
 
 
+def test_control_tick_unlatched_does_not_clear_steady(tmp_path: Path) -> None:
+    """Regression: clear_steady stays on latched-only path (not before maybe_adapt)."""
+    app = _tick_app(
+        tmp_path,
+        omega_c=0.10,
+        u_track_max=250.0,
+        zone_temp=21.0,
+        setpoint=22.0,
+        blow_up_latch=False,
+    )
+    app._tuner._steady_ticks = 3
+    app._tuner._last_critical_zone = _ZONE_NAME
+    app._ladrc.reset(21.0)
+    app._ladrc.critical_zone = _ZONE_NAME
+
+    app.control_tick({})
+
+    assert app._tuner._steady_ticks == 4
+
+
+def test_initialize_sets_blow_up_flags_false(tmp_path: Path) -> None:
+    """initialize pins latch + warned false (stubs must not be the only assign site)."""
+    app = object.__new__(HvacApp)
+    app.args = _tick_args(omega_c=0.10)
+    app.log = MagicMock()
+    app.run_every = MagicMock()
+    assert not hasattr(app, "_blow_up_latch")
+    assert not hasattr(app, "_blow_up_warned")
+
+    with patch.object(HvacApp, "app_dir", new_callable=PropertyMock) as mock_dir:
+        mock_dir.return_value = tmp_path
+        app.initialize()
+
+    assert app._blow_up_latch is False
+    assert app._blow_up_warned is False
+    app.run_every.assert_called_once()
+
+
 def test_control_tick_fail_write_warns_once_no_sticky(tmp_path: Path) -> None:
     """AI-2: trip + unreadable plant two ticks → one WARN; latch stays False."""
     app = _tick_app(
@@ -964,6 +1002,7 @@ def test_control_tick_fail_then_success_sticky_decay_no_second_warn(
 
     assert _blow_up_warning_count(app) == 1
     assert app._blow_up_latch is True
+    assert app._blow_up_warned is True
     assert app._tuner.omega_c == pytest.approx(expected)
     assert app._tuner.omega_c < omega_before
 

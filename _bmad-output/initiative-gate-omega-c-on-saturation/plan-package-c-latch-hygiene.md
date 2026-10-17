@@ -120,3 +120,25 @@ Build `HvacConfig` via `parse_config` using the same ladrc numbers as `tests/tes
 **Commands:**
 - `uv run pytest tests/test_hvac_app.py -q` -- expected: all passed
 - `uv run ruff check apps/hvac/hvac_app.py tests/test_hvac_app.py` -- expected: clean
+
+## Code Review
+
+### 2026-10-17
+
+**Code review complete.** 0 `decision-needed`, 3 `patch`, 2 `defer`, 8 rejected.
+
+- [x] [Review][Patch] Lock `clear_steady` to latched-only path — add Hass-stubbed unlatched tick that seeds mid-range `_steady_ticks` and asserts it increments (not reset) [`tests/test_hvac_app.py`]
+- [x] [Review][Patch] Pin `_blow_up_warned` (and latch) via `initialize` harness — stubs currently set the flag via `__new__` only [`apps/hvac/hvac_app.py:174`]
+- [x] [Review][Patch] Assert `_blow_up_warned` stays True after fail-then-success sticky tick [`tests/test_hvac_app.py:919`]
+- [x] [Review][Defer] ADR 0003 Guards omit Package C `clear_steady` / episode WARN [`docs/adr/0003-online-ladrc-omega-c-auto-tune.md:21`] — deferred: companion CAP-4 was Q6 scope; ADR sync is agent/spec follow-up
+- [x] [Review][Defer] Retro / deferred-work still frame AI-3 / WARN open items without Package C close-out note [`epic-gate-omega-c-on-saturation-retrospective.md`] — deferred: process-doc hygiene after build
+
+Rejected:
+- `false` min_steady_ticks=1 first unlatched propose — clear_steady clears residual; first-tick propose with min_steady=1 is fresh accumulation (normal tuner), not leftover warm counter
+- `low` AI-1 test forces latch rather than sticky→clear episode — AC still locked; end-to-end sticky drive is more complexity than everyday value
+- `low` warn_rearms mid-test config swap — brittle style; no product harm
+- `low` duplicated get_state side_effects — refactor without named invariant break
+- `low` companion buries clear_steady in skip bullet — cosmetic wording
+- `low` no multi-success sticky “warned stays True” lock — beyond Q5; fail-then-success already covers one success tick
+- `false` intent R2 (full retro AI-3) vs shipped stubs — Q5 explicitly narrowed; not a defect
+- `low` deferred-work omits “AI-1/AI-2 closed” note — process; subsumed by defer bullet above
