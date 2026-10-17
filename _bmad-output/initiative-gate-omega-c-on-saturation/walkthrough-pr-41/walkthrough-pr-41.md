@@ -2,7 +2,7 @@
 
 Target: [PR #41](https://github.com/zhmachenkov-d/ha-smart-hvac/pull/41) (`fix/omega-c-package-c-latch-hygiene` → `main`, commits `3435c63` + `754b30d`)
 Focus: human review of full PR #41 (Package C latch hygiene + epic retro / party trail)
-Current block: closed — walkthrough complete; awaiting wrap-up
+Current block: closed — walkthrough complete; wrap-up: commit/push + merge PR #41 + delete feature branch
 
 ## Blocks
 
