@@ -17,7 +17,7 @@ from hvac.hvac_app import (
     latch_after_zone_change,
     latch_decay_residue_holds,
     next_decayed_omega_c,
-    should_commit_omega_c,
+    should_apply_omega_c,
     sticky_blow_up_latch,
 )
 from hvac.ladrc import LadrcState
@@ -347,21 +347,22 @@ def test_control_tick_wires_should_warn_and_sticky_latch():
 
 
 def test_control_tick_skips_commit_omega_c_when_guard_tripped():
-    """AI-5 / F-R2: persist adapted ωc only via should_commit_omega_c after write."""
+    """AI-5 / F-R2: persist adapted ωc only via apply_proposed after write."""
     src = inspect.getsource(HvacApp.control_tick)
     write_i = src.index("_write_setpoint(guard.command)")
-    # Provisional apply gate before write; commit gate after write (else of decay).
-    assert src.index("should_commit_omega_c") < write_i
+    # Provisional apply gate before write; post-write commit gated by apply_proposed.
+    assert src.index("should_apply_omega_c") < write_i
     post_write = src[write_i:]
-    assert "omega_to_commit = new_omega_c if apply_proposed else None" in post_write
-    commit_gate = "if should_commit_omega_c("
+    assert "omega_to_commit" not in post_write
+    assert "should_apply_omega_c" not in post_write
+    commit_gate = "if apply_proposed:"
     assert commit_gate in post_write
     # Normal commit lives in the else of the CAP-4 decay branch.
     normal_commit = post_write.split(commit_gate, 1)[1]
-    assert "_tuner.commit_omega_c" in normal_commit
+    assert "_tuner.commit_omega_c(new_omega_c)" in normal_commit
     # Must not regress to persistence-only gating (guard.tripped alone).
     assert "if new_omega_c is not None and not guard.tripped:" not in src
-    # CAP-4: decay branch before normal should_commit else.
+    # CAP-4: decay branch before normal apply_proposed else.
     assert "latch_decay_residue_holds" in post_write
     assert "next_decayed_omega_c" in post_write
     assert post_write.index("next_decayed_omega_c") < post_write.index(commit_gate)
@@ -394,7 +395,7 @@ def test_control_tick_skips_maybe_adapt_when_latched_at_start():
         (0.06, 0.05, False, 47.0, True),  # interior
     ],
 )
-def test_should_commit_omega_c_matrix(
+def test_should_apply_omega_c_matrix(
     proposed: float | None,
     current: float,
     tripped: bool,
@@ -403,7 +404,7 @@ def test_should_commit_omega_c_matrix(
 ) -> None:
     """CAP-6(a): directional clamp + guard trip matrix."""
     assert (
-        should_commit_omega_c(
+        should_apply_omega_c(
             proposed,
             current,
             guard_tripped=tripped,
@@ -447,7 +448,7 @@ def test_saturated_upward_proposal_does_not_ratchet_applied_or_committed() -> No
         )
         assert provisional.command >= _SETPOINT_MAX
 
-        apply_proposed = should_commit_omega_c(
+        apply_proposed = should_apply_omega_c(
             proposed,
             committed_omega,
             guard_tripped=provisional.tripped,
@@ -457,34 +458,14 @@ def test_saturated_upward_proposal_does_not_ratchet_applied_or_committed() -> No
         )
         if apply_proposed:
             write_cfg = proposed_cfg
-            write_guard = provisional
         else:
             write_cfg = config.with_omega_c(committed_omega)
-            write_u = ladrc.compute_tracking(
-                measured=measured,
-                reference=reference,
-                config=write_cfg,
-                critical_zone=zone,
-            )
-            write_guard = _run_guard(
-                u_track=write_u,
-                u_ff=u_ff,
-                u_track_max=write_cfg.u_track_max,
-            )
 
         applied_omega = write_cfg.omega_c
         assert applied_omega == committed_omega
         assert applied_omega == config.omega_c
 
-        omega_to_commit = proposed if apply_proposed else None
-        if should_commit_omega_c(
-            omega_to_commit,
-            committed_omega,
-            guard_tripped=write_guard.tripped,
-            command=write_guard.command,
-            setpoint_min=_SETPOINT_MIN,
-            setpoint_max=_SETPOINT_MAX,
-        ):
+        if apply_proposed:
             committed_omega = proposed
 
         assert committed_omega == config.omega_c
@@ -696,7 +677,7 @@ def test_trip_edge_decay_persists_despite_guard_trip(tmp_path: Path) -> None:
     )
     assert guard.tripped is True
     assert (
-        should_commit_omega_c(
+        should_apply_omega_c(
             0.11,
             current,
             guard_tripped=guard.tripped,

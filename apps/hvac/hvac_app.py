@@ -109,7 +109,7 @@ def latch_after_zone_change(
     return latch_in
 
 
-def should_commit_omega_c(
+def should_apply_omega_c(
     proposed: float | None,
     current: float,
     *,
@@ -118,7 +118,7 @@ def should_commit_omega_c(
     setpoint_min: float,
     setpoint_max: float,
 ) -> bool:
-    """Directional clamp + guard trip gate for applying/committing proposed ωc."""
+    """Directional clamp + guard trip gate for applying proposed ωc."""
     if proposed is None:
         return False
     if guard_tripped:
@@ -236,26 +236,32 @@ class HvacApp(hass.Hass):
         # latch_in for sticky CAP-4 (same value passed to the write-path guard).
         latch_in = self._blow_up_latch
 
+        def track_and_guard(
+            ladrc_cfg: LadrcConfig, *, latch: bool
+        ) -> tuple[float, GuardUTrackResult]:
+            u = self._ladrc.compute_tracking(
+                measured=decision.measured,
+                reference=decision.reference,
+                config=ladrc_cfg,
+                critical_zone=decision.critical_zone,
+            )
+            g = guard_u_track(
+                u,
+                u_ff,
+                ladrc_cfg.u_track_max,
+                config.setpoint_min,
+                config.setpoint_max,
+                latch,
+            )
+            return u, g
+
         # Strict apply: provisional track+guard with proposed ωc decides apply;
         # blocked proposals never enter write-path tracking (CAP-2).
         apply_proposed = False
         if new_omega_c is not None:
             proposed_ladrc = config.ladrc.with_omega_c(new_omega_c)
-            u_track = self._ladrc.compute_tracking(
-                measured=decision.measured,
-                reference=decision.reference,
-                config=proposed_ladrc,
-                critical_zone=decision.critical_zone,
-            )
-            guard = guard_u_track(
-                u_track,
-                u_ff,
-                proposed_ladrc.u_track_max,
-                config.setpoint_min,
-                config.setpoint_max,
-                latch_in,
-            )
-            apply_proposed = should_commit_omega_c(
+            u_track, guard = track_and_guard(proposed_ladrc, latch=latch_in)
+            apply_proposed = should_apply_omega_c(
                 new_omega_c,
                 current_omega_c,
                 guard_tripped=guard.tripped,
@@ -267,37 +273,11 @@ class HvacApp(hass.Hass):
                 effective_ladrc = proposed_ladrc
             else:
                 # Discard provisional; final track+guard with committed ωc.
-                # Do not re-eval the helper on this final guard (no resurrect).
-                u_track = self._ladrc.compute_tracking(
-                    measured=decision.measured,
-                    reference=decision.reference,
-                    config=committed_ladrc,
-                    critical_zone=decision.critical_zone,
-                )
-                guard = guard_u_track(
-                    u_track,
-                    u_ff,
-                    committed_ladrc.u_track_max,
-                    config.setpoint_min,
-                    config.setpoint_max,
-                    latch_in,
-                )
+                # Do not re-eval should_apply_omega_c on this final guard.
+                u_track, guard = track_and_guard(committed_ladrc, latch=latch_in)
                 effective_ladrc = committed_ladrc
         else:
-            u_track = self._ladrc.compute_tracking(
-                measured=decision.measured,
-                reference=decision.reference,
-                config=committed_ladrc,
-                critical_zone=decision.critical_zone,
-            )
-            guard = guard_u_track(
-                u_track,
-                u_ff,
-                committed_ladrc.u_track_max,
-                config.setpoint_min,
-                config.setpoint_max,
-                latch_in,
-            )
+            u_track, guard = track_and_guard(committed_ladrc, latch=latch_in)
             effective_ladrc = committed_ladrc
 
         if guard.should_warn:
@@ -342,19 +322,10 @@ class HvacApp(hass.Hass):
                 )
             )
         else:
-            # Commit only on applied proposals via helper on the write-path guard.
-            # Blocked apply passes None so a final interior command cannot resurrect.
-            omega_to_commit = new_omega_c if apply_proposed else None
-            if should_commit_omega_c(
-                omega_to_commit,
-                current_omega_c,
-                guard_tripped=guard.tripped,
-                command=guard.command,
-                setpoint_min=config.setpoint_min,
-                setpoint_max=config.setpoint_max,
-            ):
-                assert omega_to_commit is not None
-                self._tuner.commit_omega_c(omega_to_commit)
+            # Commit when apply_proposed (write-path already passed the gate).
+            if apply_proposed:
+                assert new_omega_c is not None
+                self._tuner.commit_omega_c(new_omega_c)
         self._tuner.publish_sensor(self)
         if guard.tripped:
             self.log(
