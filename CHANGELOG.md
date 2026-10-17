@@ -2,6 +2,43 @@
 
 <!-- version list -->
 
+## v1.0.0 (2026-10-17)
+
+### Bug Fixes
+
+- **hacs**: Rename package and repo to ha_smart_hvac
+  ([`5b7e17b`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/5b7e17bdaaaff49ed9f88f7a75efae6bca3c3a15))
+
+### Chores
+
+- **bmad**: Add PR #43 walkthrough and clear deferred Q5
+  ([`644fbec`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/644fbecd930dbf2bd6bf54505462ac776c6b04ad))
+
+- **bmad**: Drop duplicate PR #43 review-log stub
+  ([`093756f`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/093756f76e9701b447407364550872792be8f769))
+
+- **bmad**: Drop empty ticket keys from Package C oneshot plans
+  ([`7376c8e`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/7376c8e4c373d3f0ec674e30f76694c3ec0c6189))
+
+- **bmad**: Note PR #41 walkthrough wrap-up in review log
+  ([`f5ebb4b`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/f5ebb4b87454b4776874d59a5ca2a9a94f9c5c85))
+
+### Documentation
+
+- **adr**: Close Package C clear_steady and WARN framing
+  ([`6a05fbe`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/6a05fbe5013dfdd8c9d456f701ed61e1d16d8db3))
+
+### Testing
+
+- **hvac**: Add Package C deferred stub locks
+  ([`22482cb`](https://github.com/zhmachenkov-d/ha_smart_hvac/commit/22482cbb004fe728715370af06f5aabd0cbd2d22))
+
+### Breaking Changes
+
+- **hacs**: Apps.yaml must use module: ha_smart_hvac; copy apps.yaml.example from the repo root.
+  GitHub repo is now ha_smart_hvac.
+
+
 ## v0.5.1 (2026-10-17)
 
 ### Bug Fixes
